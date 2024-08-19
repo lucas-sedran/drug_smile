@@ -1,0 +1,4 @@
+*.ipynb
+raw_data/
+.python-version
+notebooks/
