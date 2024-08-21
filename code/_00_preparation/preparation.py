@@ -172,6 +172,7 @@ def get_and_save_little_samples():
     save_little_samples(get_little_samples(nb_sample=1000))
     save_little_samples(get_little_samples(nb_sample=5000))
     save_little_samples(get_little_samples(nb_sample=10000))
+    save_little_samples(get_little_samples(nb_sample=100000))
     print('----- get_and_save_little_samples : DONE -----\n')
 
 
