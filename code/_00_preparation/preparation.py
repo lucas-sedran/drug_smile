@@ -117,6 +117,7 @@ def completed_data(df_bound):
             LIMIT {df_positive.shape[0]}
         """).df()
         df_final = pd.concat([df_positive, df_negative], axis=0)
+        df_final['binds'] = df_final['binds'].astype('int8')
 
         # Save as .parquet
         df_final.to_parquet(os.path.join(parent_dir, f'drug_smile/raw_data/df_{protein}.parquet'))
