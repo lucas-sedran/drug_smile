@@ -154,6 +154,7 @@ def get_little_samples(nb_sample):
                                 WHERE binds = 1
                                 ORDER BY random()
                                 LIMIT {round(nb_sample/2,0)})""").df()
+        df = df.drop('__index_level_0__', axis=1)
         my_list.append(df)
     con.close()
     return my_list
