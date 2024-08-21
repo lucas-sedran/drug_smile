@@ -1,2 +1,2 @@
-pip install pyarrow
-pip install fastparquet
+pyarrow
+fastparquet
