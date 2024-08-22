@@ -120,7 +120,7 @@ def completed_data(df_bound):
         df_final['binds'] = df_final['binds'].astype('int8')
 
         # Save as .parquet
-        df_final.to_parquet(os.path.join(parent_dir, f'drug_smile/raw_data/df_{protein}.parquet'))
+        df_final.to_parquet(os.path.join(parent_dir, f'drug_smile/raw_data/df_{protein}_all.parquet'))
 
         print(f"Nb de {protein}_0 : {df_negative.shape[0]}")
     con.close()
@@ -137,9 +137,9 @@ def creation_full_data():
 
 def get_little_samples(nb_sample):
     parent_dir = os.path.dirname(os.getcwd())
-    BRD4_path = os.path.join(parent_dir, 'drug_smile/raw_data/df_BRD4.parquet')
-    HSA_path = os.path.join(parent_dir, 'drug_smile/raw_data/df_HSA.parquet')
-    sEH_path = os.path.join(parent_dir, 'drug_smile/raw_data/df_sEH.parquet')
+    BRD4_path = os.path.join(parent_dir, 'drug_smile/raw_data/df_BRD4_all.parquet')
+    HSA_path = os.path.join(parent_dir, 'drug_smile/raw_data/df_HSA_all.parquet')
+    sEH_path = os.path.join(parent_dir, 'drug_smile/raw_data/df_sEH_all.parquet')
 
     con = duckdb.connect()
     my_list = []
