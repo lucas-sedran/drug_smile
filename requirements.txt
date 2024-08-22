@@ -1,2 +1,6 @@
 pyarrow
 fastparquet
+google-cloud-storage
+tensorflow
+uvicorn
+fastapi
