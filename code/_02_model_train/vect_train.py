@@ -7,7 +7,7 @@ from sklearn.metrics import make_scorer, average_precision_score, confusion_matr
 import seaborn as sns
 import matplotlib.pyplot as plt
 import joblib
-from code.param import *
+from code.params import *
 
 def vect_split_data(df):
     """ Divise les données en ensembles d'entraînement et de validation. """

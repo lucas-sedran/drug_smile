@@ -1,6 +1,6 @@
 from code._01_preprocessing.vect_preproc import vect_load_data, vect_clean_data, vect_preprocess_data
 from code._02_model_train.vect_train import vect_split_data, vect_train_and_evaluate, vect_save_model
-from code.param import *
+from code.params import *
 
 def main_vecteurs(name_protein,nb_sample):
     print(f"----- get_vecteurs_model {name_protein} {nb_sample} : START -----")
