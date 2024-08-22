@@ -56,7 +56,7 @@ def vect_train_and_evaluate(X_train, X_val, y_train, y_val):
             best_model = model
 
         y_pred = model.predict(X_val)
-        cm = confusion_matrix(y_val, y_pred)
+        # cm = confusion_matrix(y_val, y_pred)
         # plt.figure(figsize=(6, 4))
         # sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=["Negative", "Positive"], yticklabels=["Negative", "Positive"])
         # plt.title(f"Matrice de Confusion - {name}")
