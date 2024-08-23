@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import joblib
 from code.params import *
 from google.cloud import storage
+import pickle
 
 
 def vect_split_data(df):
@@ -71,6 +72,7 @@ def vect_train_and_evaluate(X_train, X_val, y_train, y_val):
         name_protein = NAME_PROTEIN
         nb_sample = NB_SAMPLE
         vect_save_model(name_model.replace(" ", "_"), model, name_protein, nb_sample)
+        save_param_model(name_model, ap_score, grid.best_params_)
 
         print(classification_report(y_val, y_pred))
         print('------------------------------------------------------------')
@@ -99,3 +101,32 @@ def vect_save_model(name_model, model, name_protein, nb_sample):
     # Télécharger le fichier local vers GCS
     blob.upload_from_filename(destination_file_name)
     print(f"\nModèle enregistré sur GCS dans le bucket {bucket_name}\n")
+
+def save_param_model(name_model, ap_score, best_params_):
+    # Save param
+    # Chemin du fichier contenant le dictionnaire
+    chemin_fichier = "models/ours_models.pkl"
+
+    # Vérifier si le fichier existe
+    if os.path.exists(chemin_fichier):
+        # Charger le dictionnaire existant
+        with open(chemin_fichier, 'rb') as fichier:
+            ours_models = pickle.load(fichier)
+    else:
+        # Si le fichier n'existe pas, initialiser un dictionnaire vide
+        ours_models = {}
+
+    # Nouvelles informations à ajouter
+    nouvelles_infos = {
+        name_model: {"Average Precision": round(float(ap_score),4), "Parameters": best_params_}
+    }
+
+    # Mise à jour du dictionnaire existant avec les nouvelles informations
+    ours_models.update(nouvelles_infos)
+
+    # Créer le répertoire 'models' s'il n'existe pas encore
+    os.makedirs(os.path.dirname(chemin_fichier), exist_ok=True)
+
+    # Sauvegarder le dictionnaire mis à jour
+    with open(chemin_fichier, 'wb') as fichier:
+        pickle.dump(ours_models, fichier)

@@ -10,6 +10,7 @@ __MACOSX
 *.ipynb
 notebooks/
 .pytest_cache
+*.pyc
 *checkpoint.ipynb
 *.ipynb_checkpoints
 
