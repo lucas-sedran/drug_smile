@@ -13,10 +13,10 @@ def main_vecteurs(name_protein,nb_sample):
     X_train, X_val, y_train, y_val = vect_split_data(df)
 
     # Entraînement et évaluation
-    best_model = vect_train_and_evaluate(X_train, X_val, y_train, y_val)
+    best_model, name_model = vect_train_and_evaluate(X_train, X_val, y_train, y_val)
 
     # Sauvegarde du meilleur modèle
-    vect_save_model(best_model, name_protein, nb_sample)
+    vect_save_model(name_model, best_model, name_protein, nb_sample)
     print(f"----- get_vecteurs_model {name_protein} {nb_sample} : STOP -----\n")
 
 if __name__ == "__main__":
