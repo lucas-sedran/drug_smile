@@ -19,6 +19,7 @@ def download_blob(gcp_project, bucket_name, source_blob_name, destination_file_n
 
 def vect_load_data(name_protein, nb_sample):
     """ Charge les données depuis un fichier parquet basé sur le nombre d'échantillons spécifié. """
+    print(f"On est dans le load data")
     name_file = f"df_{name_protein}_{nb_sample}.parquet"
     parent_dir = os.path.dirname(os.getcwd())
     train_path = os.path.join(parent_dir, f'drug_smile/raw_data/{name_file}')
