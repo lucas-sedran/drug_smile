@@ -6,3 +6,6 @@ get_and_save_little_samples:
 
 get_vecteurs_model:
 	python -c "from code._02_model_train.registry import main_vecteurs; main_vecteurs(name_protein='${NAME_PROTEIN}',nb_sample='${NB_SAMPLE}')"
+
+get_GNN_model:
+	python -c "from code._02_model_train.registry import main_GNN; main_GNN(name_protein='${NAME_PROTEIN}',nb_sample='${NB_SAMPLE}')"
