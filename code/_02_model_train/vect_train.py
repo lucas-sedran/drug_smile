@@ -102,15 +102,27 @@ def vect_save_model(name_model, model, name_protein, nb_sample):
     blob.upload_from_filename(destination_file_name)
     print(f"\nModèle enregistré sur GCS dans le bucket {bucket_name}\n")
 
-def save_param_model(name_model, ap_score, best_params_):
-    # Save param
-    # Chemin du fichier contenant le dictionnaire
-    chemin_fichier = "models/ours_models.pkl"
 
-    # Vérifier si le fichier existe
-    if os.path.exists(chemin_fichier):
-        # Charger le dictionnaire existant
-        with open(chemin_fichier, 'rb') as fichier:
+def save_param_model(name_model, ap_score, best_params_):
+    # Définir les variables nécessaires
+    chemin_fichier_local = "models/ours_models.pkl"
+    gcp_project = GCP_PROJECT
+    bucket_name = BUCKET_PROD_NAME
+    name_fichier_model = "ours_models.pkl"
+
+    # Crée un client pour interagir avec GCS
+    storage_client = storage.Client(project=gcp_project)
+    # Accède au bucket spécifié
+    bucket = storage_client.bucket(bucket_name)
+    # Créer un nouvel objet blob pour interagir avec le fichier sur GCS
+    blob = bucket.blob(name_fichier_model)
+
+    # Vérifier si le fichier existe dans le bucket GCS
+    if blob.exists():
+        # Télécharger le fichier depuis le bucket GCS vers le répertoire local temporaire
+        blob.download_to_filename(chemin_fichier_local)
+        # Charger le dictionnaire existant depuis le fichier téléchargé
+        with open(chemin_fichier_local, 'rb') as fichier:
             ours_models = pickle.load(fichier)
     else:
         # Si le fichier n'existe pas, initialiser un dictionnaire vide
@@ -118,15 +130,19 @@ def save_param_model(name_model, ap_score, best_params_):
 
     # Nouvelles informations à ajouter
     nouvelles_infos = {
-        name_model: {"Average Precision": round(float(ap_score),4), "Parameters": best_params_}
+        name_model: {"Average Precision": round(float(ap_score), 4), "Parameters": best_params_}
     }
 
     # Mise à jour du dictionnaire existant avec les nouvelles informations
     ours_models.update(nouvelles_infos)
 
     # Créer le répertoire 'models' s'il n'existe pas encore
-    os.makedirs(os.path.dirname(chemin_fichier), exist_ok=True)
+    os.makedirs(os.path.dirname(chemin_fichier_local), exist_ok=True)
 
-    # Sauvegarder le dictionnaire mis à jour
-    with open(chemin_fichier, 'wb') as fichier:
+    # Sauvegarder le dictionnaire mis à jour localement
+    with open(chemin_fichier_local, 'wb') as fichier:
         pickle.dump(ours_models, fichier)
+
+    # Uploader le fichier mis à jour dans le bucket GCS
+    blob.upload_from_filename(chemin_fichier_local)
+    print(f"\nModèle mis à jour et enregistré sur GCS dans le bucket {bucket_name}\n")
