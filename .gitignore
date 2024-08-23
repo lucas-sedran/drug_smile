@@ -15,6 +15,5 @@ __pycache__/
 *.ipynb_checkpoints
 # Dossier perso #
 raw_data/
-models/
 # Models #
 *.pkl
