@@ -9,10 +9,7 @@ __MACOSX
 *.ipynb
 notebooks/
 .pytest_cache
-<<<<<<< HEAD
 *.pyc
-=======
->>>>>>> main
 *checkpoint.ipynb
 *.ipynb_checkpoints
 # Dossier perso #
