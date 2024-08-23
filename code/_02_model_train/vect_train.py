@@ -8,6 +8,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import joblib
 from code.params import *
+from google.cloud import storage
+
 
 def vect_split_data(df):
     """ Divise les données en ensembles d'entraînement et de validation. """
@@ -36,8 +38,9 @@ def vect_train_and_evaluate(X_train, X_val, y_train, y_val):
     average_precision_scorer = make_scorer(average_precision_score, response_method='predict_proba')
     best_model = None
     best_score = 0
+    best_name_model = None
 
-    for name, mp in param_grid.items():
+    for name_model, mp in param_grid.items():
         grid = GridSearchCV(mp['model'], mp['params'], cv=5, scoring=average_precision_scorer)
         grid.fit(X_train, y_train)
 
@@ -47,13 +50,14 @@ def vect_train_and_evaluate(X_train, X_val, y_train, y_val):
         ap_score = average_precision_score(y_val, y_proba)
 
         print('\n------------------------------------------------------------')
-        print(f"{name}:")
+        print(f"{name_model}:")
         print(f"  - Best Average Precision: {ap_score:.4f}")
         print(f"  - Best Parameters: {grid.best_params_}")
 
         if ap_score > best_score:
             best_score = ap_score
             best_model = model
+            best_name_model = name_model.replace(" ", "_")
 
         y_pred = model.predict(X_val)
         # cm = confusion_matrix(y_val, y_pred)
@@ -64,14 +68,34 @@ def vect_train_and_evaluate(X_train, X_val, y_train, y_val):
         # plt.ylabel("Actual")
         # plt.show()
 
+        name_protein = NAME_PROTEIN
+        nb_sample = NB_SAMPLE
+        vect_save_model(name_model.replace(" ", "_"), model, name_protein, nb_sample)
+
         print(classification_report(y_val, y_pred))
         print('------------------------------------------------------------')
 
-    return best_model
+    return best_model, best_name_model
 
-def vect_save_model(model, name_protein, nb_sample):
+def vect_save_model(name_model, model, name_protein, nb_sample):
     """ Enregistre le meilleur modèle trouvé. """
+    name_fichier_model = f"model_vect_{name_model}_{name_protein}_{nb_sample}.pkl"
+    gcp_project = GCP_PROJECT
+    bucket_name = BUCKET_PROD_NAME
+    source_model_name = name_fichier_model
     parent_dir = os.path.dirname(os.getcwd())
-    model_path = os.path.join(parent_dir, f'drug_smile/raw_data/best_model_vector_SVC_{name_protein}_{nb_sample}.pkl\n')
-    joblib.dump(model, model_path)
-    print(f"\nModèle enregistré à : {model_path}")
+    destination_file_name = os.path.join(parent_dir, f'drug_smile/models/{name_fichier_model}')
+
+    # Télécharge le fichier localement
+    joblib.dump(model, destination_file_name)
+    print(f"\nModèle enregistré à : {destination_file_name}\n")
+
+    # Crée un client pour interagir avec GCS
+    storage_client = storage.Client(project=gcp_project)
+    # Accède au bucket spécifié
+    bucket = storage_client.bucket(bucket_name)
+    # Créer un nouvel objet blob dans le bucket
+    blob = bucket.blob(source_model_name)
+    # Télécharger le fichier local vers GCS
+    blob.upload_from_filename(destination_file_name)
+    print(f"\nModèle enregistré sur GCS dans le bucket {bucket_name}\n")

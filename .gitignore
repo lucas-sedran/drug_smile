@@ -10,8 +10,12 @@ __MACOSX
 notebooks/
 .pytest_cache
 __pycache__/
+code/_01_preprocessing/__pycache__/
+code/_02_model_train/__pycache__/
 *.pyc
 *checkpoint.ipynb
 *.ipynb_checkpoints
 # Dossier perso #
 raw_data/
+# Models #
+*.pkl
