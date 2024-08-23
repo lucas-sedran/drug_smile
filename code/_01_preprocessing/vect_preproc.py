@@ -24,6 +24,7 @@ def vect_load_data(name_protein, nb_sample):
     train_path = os.path.join(parent_dir, f'drug_smile/raw_data/{name_file}')
 
     if os.path.exists(train_path):
+        print(f"---------------- Data downloaded on local file ----------------")
         df = pd.read_parquet(train_path)
     else:
         print(f"------------------- Data to download on GCP -------------------")
