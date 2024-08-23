@@ -2,12 +2,37 @@ import os
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
+from google.cloud import storage
+from code.params import *
+
+def download_blob(gcp_project, bucket_name, source_blob_name, destination_file_name):
+    """Downloads a blob from the bucket."""
+    # Crée un client pour interagir avec GCS
+    storage_client = storage.Client(project=gcp_project)
+    # Accède au bucket spécifié
+    bucket = storage_client.bucket(bucket_name)
+    # Accède au fichier (blob) dans le bucket
+    blob = bucket.blob(source_blob_name)
+    # Télécharge le fichier localement
+    blob.download_to_filename(destination_file_name)
+    print(f"Blob {source_blob_name} downloaded to {destination_file_name}.")
 
 def vect_load_data(name_protein, nb_sample):
     """ Charge les données depuis un fichier parquet basé sur le nombre d'échantillons spécifié. """
+    name_file = f"df_{name_protein}_{nb_sample}.parquet"
     parent_dir = os.path.dirname(os.getcwd())
-    train_path = os.path.join(parent_dir, f'drug_smile/raw_data/df_{name_protein}_{nb_sample}.parquet')
-    df = pd.read_parquet(train_path)
+    train_path = os.path.join(parent_dir, f'drug_smile/raw_data/{name_file}')
+
+    if os.path.exists(train_path):
+        df = pd.read_parquet(train_path)
+    else:
+        print(f"------------------- Data to download on GCP -------------------")
+        gcp_project = GCP_PROJECT
+        bucket_name = BUCKET_DATA_NAME
+        source_blob_name = f"echantillons/{name_file}"
+        destination_file_name = os.path.join(parent_dir, f'drug_smile/raw_data/{name_file}')
+        download_blob(gcp_project, bucket_name, source_blob_name, destination_file_name)
+        df = pd.read_parquet(train_path)
     return df
 
 def vect_clean_data(df):
