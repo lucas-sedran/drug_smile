@@ -130,7 +130,7 @@ def save_param_model(name_model, ap_score, best_params_):
 
     # Nouvelles informations à ajouter
     nouvelles_infos = {
-        name_model: {"Average Precision": round(float(ap_score), 4), "Parameters": best_params_}
+        (f"{name_model} {NB_SAMPLE}"): {"Average Precision": round(float(ap_score), 4), "Parameters": best_params_}
     }
 
     # Mise à jour du dictionnaire existant avec les nouvelles informations
