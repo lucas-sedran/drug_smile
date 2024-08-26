@@ -31,19 +31,32 @@ def calculate_descriptors(molecule_rdkit):
     return descriptors
 
 
-def cara_preprocess_data(df):
+def process_chunk(chunk):
     # Conversion from SMILE to RDKit Molecule
-    df['molecule_rdkit'] = df['molecule_smiles'].apply(Chem.MolFromSmiles)
+    chunk['molecule_rdkit'] = chunk['molecule_smiles'].apply(Chem.MolFromSmiles)
 
-    # Features Creation based on RDKlit library and Molecule Specificities
-    descriptors_df = df['molecule_rdkit'].apply(calculate_descriptors).apply(pd.Series)
+    # Features Creation based on RDKit library and Molecule Specificities
+    descriptors_df = chunk['molecule_rdkit'].apply(calculate_descriptors).apply(pd.Series)
 
-    # Combine new columns with our dataframe
-    df_updated = pd.concat([df, descriptors_df], axis=1)
+    # Combine new columns with the chunk
+    chunk_updated = pd.concat([chunk, descriptors_df], axis=1)
 
-    # drop y and molecule_rdkit as this is object column
-    X = df_updated.drop(['binds','molecule_rdkit'],axis=1)
-    y = df_updated['binds']
+    return chunk_updated
+
+def cara_preprocess_data(df, chunk_size=CHUNK_SIZE):
+    df_chunks = []
+
+    for start in range(0, len(df), chunk_size):
+        chunk = df.iloc[start:start + chunk_size]
+        chunk_updated = process_chunk(chunk)
+        df_chunks.append(chunk_updated)
+
+    # Concatenate all chunks
+    chunk_updated = pd.concat(df_chunks, ignore_index=True)
+
+    # Drop 'binds' and 'molecule_rdkit' columns
+    X = chunk_updated.drop(['binds', 'molecule_rdkit'], axis=1)
+    y = chunk_updated['binds']
 
     # replace inf values by nan
     X.replace([np.inf, -np.inf], np.nan, inplace=True)
@@ -60,7 +73,7 @@ def cara_preprocess_data(df):
 
     # Train Test Split Data
     test_size = 0.3
-    X_train,X_val,y_train,y_val = train_test_split(X,y,test_size=test_size, random_state = RANDOM_STATE)
+    X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=test_size, random_state=RANDOM_STATE)
 
     # Define the numerical pipeline
     num_transformer = Pipeline([
@@ -81,4 +94,4 @@ def cara_preprocess_data(df):
     X_train_transformed = preprocessor.fit_transform(X_train)
     X_val_transformed = preprocessor.transform(X_val)
 
-    return X_train_transformed,X_val_transformed,y_train,y_val
+    return X_train_transformed, X_val_transformed, y_train, y_val
