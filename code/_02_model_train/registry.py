@@ -48,6 +48,29 @@ def main_GNN(name_protein,nb_sample):
 
     print(f"----- get_vecteurs_model {name_protein} {nb_sample} : STOP -----\n")
 
+def main_GNN_just_train(best_params, name_protein, nb_sample):
+    print(f"----- get_vecteurs_model {name_protein} {nb_sample} : START -----")
+
+    # Récupération des données
+    df = vect_load_data(name_protein, nb_sample)
+
+    # Transformation et division des données
+    X_train, X_test, y_train, y_test, train_loader, test_loader, num_edge_features, num_node_features = GNN_transform_data(df)
+
+    # Instanciation des classes
+    GNN, _ = GNN_create_classes()
+
+    # Utilisation des meilleurs paramètres déjà obtenus
+    best_model = GNN_find_best_model(GNN, best_params, num_node_features, num_edge_features)
+
+    # Entraînement
+    best_model_trained, avg_val_precision = GNN_train(best_model, best_params, train_loader, test_loader)
+
+    # Sauvegarde
+    GNN_save_model(best_model_trained, name_protein, nb_sample)
+    save_param_model('GNN', avg_val_precision, best_params)
+
+    print(f"----- get_vecteurs_model {name_protein} {nb_sample} : STOP -----\n")
 
 
 

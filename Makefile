@@ -9,3 +9,6 @@ get_vecteurs_model:
 
 get_GNN_model:
 	python -c "from code._02_model_train.registry import main_GNN; main_GNN(name_protein='${NAME_PROTEIN}',nb_sample='${NB_SAMPLE}')"
+
+get_GNN_model_just_train:
+	python -c "from code._02_model_train.registry import main_GNN_just_train; main_GNN_just_train(best_params={'hidden_channels': 128,'learning_rate': 0.001,'num_layers': 2}, name_protein='$$NAME_PROTEIN', nb_sample='$$NB_SAMPLE')"
