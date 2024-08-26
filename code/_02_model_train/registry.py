@@ -1,4 +1,4 @@
-from code._01_preprocessing.vect_preproc import vect_load_data, vect_clean_data, vect_preprocess_data
+from code._01_preprocessing.vect_preproc import vect_load_data, vect_clean_data, vect_preprocess_data, check_and_process_file
 from code._01_preprocessing.cara_preproc import cara_preprocess_data
 from code._02_model_train.vect_train import vect_split_data, vect_train_and_evaluate, vect_save_model, vect_Grid_Search
 from code._02_model_train.cara_train import run_model_svc
@@ -28,9 +28,7 @@ def main_vect_Grid_search(name_protein,nb_sample):
 def main_vecteurs(name_protein,nb_sample):
     print(f"----- get_vecteurs_model {name_protein} {nb_sample} : START -----")
     # Récupération et prétraitement des données
-    df = vect_load_data(name_protein,nb_sample)
-    df = vect_clean_data(df)
-    df = vect_preprocess_data(df)
+    df = check_and_process_file()
 
     # Division des données
     X_train, X_val, y_train, y_val = vect_split_data(df)

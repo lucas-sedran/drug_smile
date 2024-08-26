@@ -77,3 +77,43 @@ def vect_preprocess_data(df, chunk_size=50000):
     df_processed = pd.concat(df_chunks, ignore_index=True)
     print(f"------------------- FINISHED processing all chunks -------------------")
     return df_processed
+
+def check_and_process_file():
+    name_file = f"df_vect_preproc_{NAME_PROTEIN}_{NB_SAMPLE}.pkl"
+    source_blob_name = f"echantillons/{name_file}"
+    # Initialiser le client Google Cloud Storage
+    storage_client = storage.Client(project=GCP_PROJECT)
+    bucket = storage_client.bucket(BUCKET_DATA_NAME)
+    blob = bucket.blob(source_blob_name)
+
+    # Vérifier si le fichier existe dans le bucket
+    if blob.exists():
+        print(f"Le fichier {name_file} existe déjà dans le bucket. Téléchargement en cours...")
+
+        # Télécharger le fichier du bucket
+        blob.download_to_filename(name_file)
+
+        # Charger le fichier en DataFrame
+        df = pd.read_pickle(name_file)
+        print(f"Le fichier {name_file} a été chargé en DataFrame.")
+    else:
+        print(f"Le fichier {name_file} n'existe pas dans le bucket. Sauvegarde en cours...")
+
+        # On réalise le préprocessing
+        df = vect_load_data(NAME_PROTEIN,NB_SAMPLE)
+        df = vect_clean_data(df)
+        df_processed = vect_preprocess_data(df)
+
+        # Sauvegarder df_processed en fichier .pkl localement
+        parent_dir = os.path.dirname(os.getcwd())
+        destination_file_name = os.path.join(parent_dir, f'drug_smile/raw_data/{name_file}')
+        df_processed.to_pickle(destination_file_name)
+
+        # Uploader le fichier .pkl sur le bucket
+        blob.upload_from_filename(destination_file_name)
+        print(f"Le fichier {name_file} a été sauvegardé dans le bucket.")
+
+        # Charger le DataFrame pour un éventuel traitement ultérieur
+        df = df_processed
+
+    return df
