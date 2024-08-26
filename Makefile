@@ -9,3 +9,8 @@ get_vecteurs_model:
 
 get_GNN_model:
 	python -c "from code._02_model_train.registry import main_GNN; main_GNN(name_protein='${NAME_PROTEIN}',nb_sample='${NB_SAMPLE}')"
+
+
+#################### API #########################
+run_api:
+	uvicorn code.api.api:app --reload
