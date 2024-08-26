@@ -26,17 +26,12 @@ def load():
         model = joblib.load(model_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unable to load model: {e}")
+    return model
 
 
 # Loading model
 model = load()
 
-
-@app.post("/model")
-async def model(request:Request):
-    model = await request.json()
-    selected_open = model.get('selected_model')
-    return {"model" : {selected_open}}
 
 
 @app.post("/loaddata")
@@ -48,9 +43,14 @@ async def predict( model_name: str = Form(...) ,file : UploadFile = File(...)):
     print(df)
 
     print(model_name)
+    if model_name == "Logistic Regression":
+        preproc_df = vect_preprocess_data(df)
+        X = preproc_df['ecfp'].tolist()
+        prediction = model.predict(X)
+        return prediction
 
 
-    return {"message":"Parquet received","columns": df.columns.tolist()}
+    return {"message":"Parquet received","columns": df.columns.tolist(),"model_selected":model_name}
 
 
 
