@@ -13,7 +13,7 @@ def main_vect_Grid_search(name_protein,nb_sample):
     # Récupération et prétraitement des données
     df = vect_load_data(name_protein,nb_sample)
     df = vect_clean_data(df)
-    df = vect_preprocess_data(df)
+    df = vect_preprocess_data(df, chunk_size=50000)
 
     # Division des données
     X_train, X_val, y_train, y_val = vect_split_data(df)

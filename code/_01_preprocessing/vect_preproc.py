@@ -53,8 +53,27 @@ def vect_generate_ecfp(molecule, radius=2, bits=1024):
     fingerprint = AllChem.GetMorganFingerprintAsBitVect(molecule, radius, nBits=bits)
     return list(fingerprint)
 
-def vect_preprocess_data(df):
-    """ Applique le prétraitement sur le DataFrame : convertit les SMILES en objets RDKit et génère les ECFP. """
-    df['molecule'] = df['molecule_smiles'].apply(Chem.MolFromSmiles)
-    df['ecfp'] = df['molecule'].apply(vect_generate_ecfp)
-    return df
+def vect_preprocess_data(df, chunk_size=50000):
+    """Applique le prétraitement sur le DataFrame par chunks : convertit les SMILES en objets RDKit et génère les ECFP."""
+    print(f"------------------- START smile transformation into molecule -------------------")
+
+    df_chunks = []
+
+    # Découpe du DataFrame en chunks
+    for i in range(0, len(df), chunk_size):
+        chunk = df.iloc[i:i + chunk_size].copy()
+        print(f"Processing chunk {i // chunk_size + 1}")
+
+        # Transformation des SMILES en molécules RDKit
+        chunk['molecule'] = chunk['molecule_smiles'].apply(Chem.MolFromSmiles)
+        print(f"------------------- START molecule transformation into ECFP for chunk {i // chunk_size + 1} -------------------")
+
+        # Génération des ECFP
+        chunk['ecfp'] = chunk['molecule'].apply(vect_generate_ecfp)
+        print(f"------------------- STOP molecule transformation into ECFP for chunk {i // chunk_size + 1} -------------------")
+        df_chunks.append(chunk)
+
+    # Concatenation de tous les chunks
+    df_processed = pd.concat(df_chunks, ignore_index=True)
+    print(f"------------------- FINISHED processing all chunks -------------------")
+    return df_processed
