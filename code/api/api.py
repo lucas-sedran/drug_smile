@@ -1,7 +1,8 @@
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, UploadFile, Request,File
 #from tensorflow.keras.models import load_model
 import pandas as pd
 import io
+
 
 app = FastAPI()
 #app.state.model = load_model()
@@ -25,16 +26,24 @@ def root():
 # Loading model
 model = load() """
 
-def preprocess_csv(csv_data):
-    data = pd.read_parquet(io.BytesIO(csv_data))
+def preprocess_parquet(parquet_data):
+    data = pd.read_parquet(io.BytesIO(parquet_data))
     return data
 
-@app.post("/predict")
-async def predict(file : UploadFile):
-    csv = await file.read()
 
-    data = preprocess_csv(csv)
-    csv_dict = data.to_dict()
-    print(csv_dict)
-    #predict = model.predict(data)
-    return {"data":csv_dict}
+
+@app.post("/model")
+async def model(request:Request):
+    model = await request.json()
+    selected_open = model.get('selected_model')
+    return {"model" : {selected_open}}
+
+
+
+@app.post("/predict")
+async def predict(file : UploadFile = File(...)):
+    contents = await file.read()
+    df = pd.read_parquet(io.BytesIO(contents))
+    print(df)
+
+    return {"message":"Parquet received","columns": df.columns.tolist()}
