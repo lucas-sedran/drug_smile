@@ -62,7 +62,7 @@ class GNN(torch.nn.Module):
         x, edge_index, batch, edge_attr = data.x, data.edge_index, data.batch, data.edge_attr
         for conv in self.convs:
             x = conv(x, edge_index, edge_attr)
-            x = F.relu(x)
+            x = F.gelu(x)
             x = self.dropout(x)
         x = global_mean_pool(x, batch)
         x = F.gelu(self.fc1(x))
