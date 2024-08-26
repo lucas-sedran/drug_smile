@@ -1,17 +1,18 @@
 # Environnement #
 .env
 .python-version
-
 # OS generated files #
-.DS_Store
+**.DS_Store
 __MACOSX
 # Jupiter Notebook #
 *.ipynb
 notebooks/
 .pytest_cache
-__pycache__
 *checkpoint.ipynb
 *.ipynb_checkpoints
+# python
+**__pycache__
+**.pyc
 # Dossier perso #
 raw_data/
 # Models #
