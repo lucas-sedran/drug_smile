@@ -53,7 +53,7 @@ def vect_generate_ecfp(molecule, radius=2, bits=1024):
     fingerprint = AllChem.GetMorganFingerprintAsBitVect(molecule, radius, nBits=bits)
     return list(fingerprint)
 
-def vect_preprocess_data(df, chunk_size=50000):
+def vect_preprocess_data(df, chunk_size=CHUNK_SIZE):
     """Applique le prétraitement sur le DataFrame par chunks : convertit les SMILES en objets RDKit et génère les ECFP."""
     print(f"------------------- START smile transformation into molecule -------------------")
 
