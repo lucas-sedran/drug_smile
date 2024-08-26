@@ -72,7 +72,7 @@ def vect_Grid_Search(X_train, X_val, y_train, y_val):
         name_protein = NAME_PROTEIN
         nb_sample = NB_SAMPLE
         vect_save_model(name_model.replace(" ", "_"), model, name_protein, nb_sample)
-        save_param_model(name_model, ap_score, grid.best_params_)
+        save_param_model(name_model + ' (vect)', ap_score, grid.best_params_)
 
         print(classification_report(y_val, y_pred))
         print('------------------------------------------------------------')
@@ -104,7 +104,7 @@ def vect_train_and_evaluate(name_model, X_train, X_val, y_train, y_val):
 
     # Sauvegarder le modèle
     vect_save_model(name_model.replace(" ", "_"), model, NAME_PROTEIN, NB_SAMPLE)
-    save_param_model(name_model, ap_score, {'C': 10})
+    save_param_model(name_model + ' (vect)', ap_score, {'C': 10})
 
     # Affichage du rapport de classification
     print(classification_report(y_val, y_pred))
