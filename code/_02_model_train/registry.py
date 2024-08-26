@@ -1,12 +1,29 @@
 from code._01_preprocessing.vect_preproc import vect_load_data, vect_clean_data, vect_preprocess_data
 from code._01_preprocessing.cara_preproc import cara_preprocess_data
-from code._02_model_train.vect_train import vect_split_data, vect_train_and_evaluate, vect_save_model
+from code._02_model_train.vect_train import vect_split_data, vect_train_and_evaluate, vect_save_model, vect_Grid_Search
 from code._02_model_train.cara_train import run_model_svc
 from code._02_model_train.GNN_train import GNN_transform_data, GNN_create_classes
 from code._02_model_train.GNN_train import GNN_find_best_model,GNN_save_model
 from code._02_model_train.GNN_train import GNN_train,GNN_find_best_params
 from code._01_preprocessing.GNN_preproc import GNN_load_data
 from code.params import *
+
+def main_vect_Grid_search(name_protein,nb_sample):
+    print(f"----- get_vecteurs_model {name_protein} {nb_sample} : START -----")
+    # Récupération et prétraitement des données
+    df = vect_load_data(name_protein,nb_sample)
+    df = vect_clean_data(df)
+    df = vect_preprocess_data(df)
+
+    # Division des données
+    X_train, X_val, y_train, y_val = vect_split_data(df)
+
+    # Entraînement et évaluation
+    best_model, name_model = vect_Grid_Search(X_train, X_val, y_train, y_val)
+
+    # Sauvegarde du meilleur modèle
+    vect_save_model(name_model, best_model, name_protein, nb_sample)
+    print(f"----- get_vecteurs_model {name_protein} {nb_sample} : STOP -----\n")
 
 def main_vecteurs(name_protein,nb_sample):
     print(f"----- get_vecteurs_model {name_protein} {nb_sample} : START -----")
@@ -19,12 +36,11 @@ def main_vecteurs(name_protein,nb_sample):
     X_train, X_val, y_train, y_val = vect_split_data(df)
 
     # Entraînement et évaluation
-    best_model, name_model = vect_train_and_evaluate(X_train, X_val, y_train, y_val)
+    best_model, name_model = vect_train_and_evaluate(NAME_VECT_MODEL, X_train, X_val, y_train, y_val)
 
     # Sauvegarde du meilleur modèle
     vect_save_model(name_model, best_model, name_protein, nb_sample)
     print(f"----- get_vecteurs_model {name_protein} {nb_sample} : STOP -----\n")
-
 
 def main_GNN(name_protein,nb_sample):
     print(f"----- get_GNN_model {name_protein} {nb_sample} : START -----")
