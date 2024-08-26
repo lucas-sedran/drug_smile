@@ -9,3 +9,8 @@ numpy==1.23.4
 pandas==1.4.4
 rdkit==2024.3.5
 duckdb==1.0.0
+pyarrow
+fastparquet
+uvicorn
+fastapi
+python-multipart

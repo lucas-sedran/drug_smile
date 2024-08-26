@@ -1,7 +1,6 @@
 # Environnement #
 .env
 .python-version
-
 # OS generated files #
 **.DS_Store
 __MACOSX
