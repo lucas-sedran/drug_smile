@@ -22,3 +22,4 @@ raw_data/
 
 # Models #
 *.pkl
+nohup.out
