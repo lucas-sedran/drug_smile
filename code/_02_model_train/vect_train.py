@@ -72,7 +72,7 @@ def vect_train_and_evaluate(X_train, X_val, y_train, y_val):
         name_protein = NAME_PROTEIN
         nb_sample = NB_SAMPLE
         vect_save_model(name_model.replace(" ", "_"), model, name_protein, nb_sample)
-        save_param_model(name_model, ap_score, grid.best_params_)
+        save_param_model(name_model + ' (vect)', ap_score, grid.best_params_)
 
         print(classification_report(y_val, y_pred))
         print('------------------------------------------------------------')
