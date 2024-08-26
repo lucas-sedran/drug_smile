@@ -37,38 +37,40 @@ def GNN_transform_data(df):
     return(X_train,X_test,y_train,y_test,train_loader,test_loader,num_edge_features,num_node_features)
 
 
+# Déplacez la définition de la classe GNN au niveau du module
+class GNN(torch.nn.Module):
+    def __init__(self, num_node_features, num_edge_features, hidden_channels, num_layers, dropout_rate):
+        super(GNN, self).__init__()
+        self.convs = torch.nn.ModuleList()
+        self.convs.append(GINEConv(torch.nn.Linear(num_node_features, hidden_channels), edge_dim=num_edge_features))
+        for _ in range(num_layers - 1):
+            self.convs.append(GINEConv(torch.nn.Linear(hidden_channels, hidden_channels), edge_dim=num_edge_features))
+        self.fc1 = torch.nn.Linear(hidden_channels, 64)
+        self.fc2 = torch.nn.Linear(64, 1)
+        self.dropout = torch.nn.Dropout(p=dropout_rate)
+
+        # Initialize weights
+        self.apply(self.init_weights)
+
+    def init_weights(self, m):
+        if isinstance(m, torch.nn.Linear):
+            torch.nn.init.xavier_uniform_(m.weight)
+            if m.bias is not None:
+                torch.nn.init.zeros_(m.bias)
+
+    def forward(self, data):
+        x, edge_index, batch, edge_attr = data.x, data.edge_index, data.batch, data.edge_attr
+        for conv in self.convs:
+            x = conv(x, edge_index, edge_attr)
+            x = F.relu(x)
+            x = self.dropout(x)
+        x = global_mean_pool(x, batch)
+        x = F.gelu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+# Modifiez la fonction GNN_create_classes pour qu'elle retourne la classe définie au niveau du module
 def GNN_create_classes():
-    class GNN(torch.nn.Module):
-        def __init__(self, num_node_features, num_edge_features, hidden_channels, num_layers, dropout_rate):
-            super(GNN, self).__init__()
-            self.convs = torch.nn.ModuleList()
-            self.convs.append(GINEConv(torch.nn.Linear(num_node_features, hidden_channels), edge_dim=num_edge_features))
-            for _ in range(num_layers - 1):
-                self.convs.append(GINEConv(torch.nn.Linear(hidden_channels, hidden_channels), edge_dim=num_edge_features))
-            self.fc1 = torch.nn.Linear(hidden_channels, 64)
-            self.fc2 = torch.nn.Linear(64, 1)
-            self.dropout = torch.nn.Dropout(p=dropout_rate)
-
-            # Initialize weights
-            self.apply(self.init_weights)
-
-        def init_weights(self, m):
-            if isinstance(m, torch.nn.Linear):
-                torch.nn.init.xavier_uniform_(m.weight)
-                if m.bias is not None:
-                    torch.nn.init.zeros_(m.bias)
-
-        def forward(self, data):
-            x, edge_index, batch, edge_attr = data.x, data.edge_index, data.batch, data.edge_attr
-            for conv in self.convs:
-                x = conv(x, edge_index, edge_attr)
-                x = F.relu(x)
-                x = self.dropout(x)
-            x = global_mean_pool(x, batch)
-            x = F.gelu(self.fc1(x))
-            x = self.fc2(x)
-            return x
-
     class GNNModel(BaseEstimator, ClassifierMixin):
         def __init__(self, num_node_features, num_edge_features, hidden_channels=128, num_layers=2, dropout_rate=0.2, learning_rate=0.01, batch_size=64, epochs=50, weight_decay=0.0):
             self.num_node_features = num_node_features
@@ -125,7 +127,8 @@ def GNN_create_classes():
             proba = self.predict_proba(X)
             return (proba >= 0.5).astype(int)  # Convert to binary predictions
 
-    return GNN,GNNModel
+    return GNN, GNNModel
+
 
 def GNN_find_best_params(GNNModel,X_train,X_test,y_train,y_test,num_node_features,num_edge_features):
     param_grid = {
