@@ -160,18 +160,15 @@ def save_param_model(name_model, ap_score, best_params_):
     else:
         # Si le fichier n'existe pas, initialiser un dictionnaire vide
         ours_models = {}
-
     # Nouvelles informations à ajouter
     nouvelles_infos = {
         (f"{name_model} {NAME_PROTEIN} {NB_SAMPLE}"): {"Average Precision": round(float(ap_score), 4), "Parameters": best_params_}
     }
-
     # Mise à jour du dictionnaire existant avec les nouvelles informations
     ours_models.update(nouvelles_infos)
-
     # Créer le répertoire 'models' s'il n'existe pas encore
     os.makedirs(os.path.dirname(chemin_fichier_local), exist_ok=True)
-
+    
     # Sauvegarder le dictionnaire mis à jour localement
     with open(chemin_fichier_local, 'wb') as fichier:
         pickle.dump(ours_models, fichier)

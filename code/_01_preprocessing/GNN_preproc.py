@@ -7,12 +7,12 @@ from sklearn.decomposition import PCA
 import os
 from sklearn.preprocessing import StandardScaler
 
-def GNN_load_data(name_protein, nb_sample):
-    """ Charge les données depuis un fichier parquet basé sur le nombre d'échantillons spécifié. """
-    parent_dir = os.path.dirname(os.getcwd())
-    train_path = os.path.join(parent_dir, f'drug_smile/raw_data/df_{name_protein}_{nb_sample}.parquet')
-    df = pd.read_parquet(train_path)
-    return df
+###def GNN_load_data(name_protein, nb_sample):
+###""" Charge les données depuis un fichier parquet basé sur le nombre d'échantillons spécifié. """
+    ###parent_dir = os.path.dirname(os.getcwd())
+   ### train_path = os.path.join(parent_dir, f'drug_smile/raw_data/df_{name_protein}_{nb_sample}.parquet')
+  ###  df = pd.read_parquet(train_path)
+  ###  return df""
 
 
 def GNN_combine_corr_features(atom_features):
