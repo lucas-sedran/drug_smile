@@ -12,8 +12,5 @@ get_GNN_model:
 
 
 #################### API #########################
-run_api:
-	uvicorn code.api.api:app --reload
-
-run_api_8080:
-	uvicorn code.api.api:app --host 127.0.0.1 --port 8080 --reload
+run_api_8010:
+	uvicorn code.api.api:app --host 127.0.0.1 --port 8010 --reload
