@@ -84,6 +84,11 @@ def vect_train_and_evaluate(name_model, X_train, X_val, y_train, y_val):
     if name_model == 'Logistic Regression':
         # Définir le modèle avec C=10
         model = LogisticRegression(C=10, max_iter=1000, solver='lbfgs')
+        params = "C=10, max_iter=1000, solver='lbfgs'"
+    elif name_model == 'Random Forest':
+        # Définir le modèle avec C=10
+        model = RandomForestClassifier(max_depth= None, n_estimators= 200)
+        params = "max_depth= None, n_estimators= 200"
 
     # Entraîner le modèle
     model.fit(X_train, y_train)
@@ -96,7 +101,7 @@ def vect_train_and_evaluate(name_model, X_train, X_val, y_train, y_val):
 
     # Affichage des résultats
     print('\n------------------------------------------------------------')
-    print("Logistic Regression avec C=10:")
+    print(f"{name_model} avec {params}:")
     print(f"  - Average Precision: {ap_score:.4f}")
 
     # Prédictions
@@ -168,7 +173,7 @@ def save_param_model(name_model, ap_score, best_params_):
     ours_models.update(nouvelles_infos)
     # Créer le répertoire 'models' s'il n'existe pas encore
     os.makedirs(os.path.dirname(chemin_fichier_local), exist_ok=True)
-    
+
     # Sauvegarder le dictionnaire mis à jour localement
     with open(chemin_fichier_local, 'wb') as fichier:
         pickle.dump(ours_models, fichier)
