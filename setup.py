@@ -11,7 +11,7 @@ setup(name='drug_smile',
       description="Predict New Medicines with AI",
       license="",
       author="Lucas Sedran, Issam Mehnana, Benoit Cochet, Dorian Schnepp",
-      author_email="contact@lewagon.org",
+      author_email="lucas.sedran@hotmail.fr",
       url="https://github.com/lucas-sedran/drug_smile",
       url_interface = "https://github.com/DodooHellio/drug_smile_interface",
       install_requires=requirements,
@@ -19,5 +19,3 @@ setup(name='drug_smile',
       # include_package_data: to install data from MANIFEST.in
       include_package_data=True,
       zip_safe=False)
-
-      
