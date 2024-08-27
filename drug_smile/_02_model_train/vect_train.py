@@ -7,7 +7,7 @@ from sklearn.metrics import make_scorer, average_precision_score, confusion_matr
 import seaborn as sns
 import matplotlib.pyplot as plt
 import joblib
-from code.params import *
+from drug_smile.params import *
 from google.cloud import storage
 import pickle
 
@@ -168,7 +168,7 @@ def save_param_model(name_model, ap_score, best_params_):
     ours_models.update(nouvelles_infos)
     # Créer le répertoire 'models' s'il n'existe pas encore
     os.makedirs(os.path.dirname(chemin_fichier_local), exist_ok=True)
-    
+
     # Sauvegarder le dictionnaire mis à jour localement
     with open(chemin_fichier_local, 'wb') as fichier:
         pickle.dump(ours_models, fichier)
