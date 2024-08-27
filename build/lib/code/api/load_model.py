@@ -1,4 +1,4 @@
-from code.params import *
+from drug_smile.params import *
 from google.cloud import storage
 from tensorflow import keras
 

@@ -1,4 +1,4 @@
-from code._01_preprocessing.GNN_preproc import GNN_smiles_to_graph
+from drug_smile._01_preprocessing.GNN_preproc import GNN_smiles_to_graph
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 import torch
@@ -13,7 +13,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import make_scorer, average_precision_score
 import os
 import joblib
-from code.params import *
+from drug_smile.params import *
 from google.cloud import storage
 import pickle
 

@@ -3,7 +3,7 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from google.cloud import storage
-from code.params import *
+from drug_smile.params import *
 from tqdm import tqdm
 
 def download_blob(gcp_project, bucket_name, source_blob_name, destination_file_name):

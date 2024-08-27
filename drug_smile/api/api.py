@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile, Request,File,HTTPException,Form
-from code._01_preprocessing.vect_preproc import vect_preprocess_data
+from drug_smile._01_preprocessing.vect_preproc import vect_preprocess_data
 import pandas as pd
 import io
 import joblib
@@ -21,7 +21,7 @@ def root():
 
 def load():
     global model
-    model_path = "/home/dodo/code/DodooHellio/drug_smile/models/model_vect_Logistic_Regression_BRD4_all.pkl"
+    model_path = "/home/dodo/drug_smile/DodooHellio/drug_smile/models/model_vect_Logistic_Regression_BRD4_all.pkl"
     try:
         model = joblib.load(model_path)
     except Exception as e:

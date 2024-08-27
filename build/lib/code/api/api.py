@@ -1,5 +1,5 @@
 from fastapi import FastAPI, UploadFile, Request,File,HTTPException,Form
-from code._01_preprocessing.vect_preproc import vect_preprocess_data
+from drug_smile._01_preprocessing.vect_preproc import vect_preprocess_data
 import pandas as pd
 import io
 import joblib

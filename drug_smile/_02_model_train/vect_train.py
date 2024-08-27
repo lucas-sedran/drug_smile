@@ -7,7 +7,7 @@ from sklearn.metrics import make_scorer, average_precision_score, confusion_matr
 import seaborn as sns
 import matplotlib.pyplot as plt
 import joblib
-from code.params import *
+from drug_smile.params import *
 from google.cloud import storage
 import pickle
 
