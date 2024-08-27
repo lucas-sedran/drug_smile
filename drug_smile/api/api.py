@@ -53,8 +53,8 @@ def load_model(name_file):
         pass
     try:
         model = joblib.load(model_path)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f" ### Unable to load model {type}: {e} ###")
+    except Exception:
+        raise HTTPException(status_code=500, detail=f" ### Unable to load model {name_file} ###")
     return model
 
 
