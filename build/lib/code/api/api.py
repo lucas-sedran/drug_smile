@@ -11,17 +11,17 @@ app = FastAPI()
 
 @app.get("/ping")
 def home():
-    return {"message":"pong"}
+    return {"ping":"pong"}
 
 
 
 @app.get("/")
 def root():
-    return {'message': 'Hello'}
+    return {'greeting': 'Hello'}
 
 def load():
     global model
-    model_path = "/home/dodo/code/DodooHellio/drug_smile/models/model_vect_Logistic_Regression_BRD4_all.pkl"
+    model_path = "/home/dodohellio/code/DodooHellio/drug_smile/models/model_vect_SVC_BRD4_10k.pkl"
     try:
         model = joblib.load(model_path)
     except Exception as e:
@@ -33,8 +33,10 @@ def load():
 model = load()
 
 
-@app.post("/predict")
+
+@app.post("/loaddata")
 async def predict( model_name: str = Form(...) ,file : UploadFile = File(...)):
+
 
     contents = await file.read()
     df = pd.read_parquet(io.BytesIO(contents))
@@ -47,8 +49,18 @@ async def predict( model_name: str = Form(...) ,file : UploadFile = File(...)):
         prediction = model.predict(X)
         return prediction
 
-    if model_name == "Random Forest":
-        return { "message" : "RF"}
-
 
     return {"message":"Parquet received","columns": df.columns.tolist(),"model_selected":model_name}
+
+
+
+@app.post("/predict")
+async def predict(file : UploadFile = File(...)):
+    contents = await file.read()
+    df = pd.read_parquet(io.BytesIO(contents))
+    print(df)
+
+    preproc_df = vect_preprocess_data(df)
+    prediction = model.predict(preproc_df)
+
+    return {"message":"Parquet received","columns": df.columns.tolist(),"pred":prediction.tolist()}
