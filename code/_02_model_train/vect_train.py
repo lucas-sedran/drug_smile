@@ -110,7 +110,7 @@ def vect_train_and_evaluate(name_model, X_train, X_val, y_train, y_val):
     print(classification_report(y_val, y_pred))
     print('------------------------------------------------------------')
 
-    return model
+    return model, name_model.replace(" ", "_")
 
 def vect_save_model(name_model, model, name_protein, nb_sample):
     """ Enregistre le meilleur modèle trouvé. """
