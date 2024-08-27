@@ -13,6 +13,9 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import make_scorer, average_precision_score
 import os
 import joblib
+from code.params import *
+from google.cloud import storage
+import pickle
 
 def GNN_transform_data(df):
     """ Divise les données en ensembles d'entraînement et de validation. """
@@ -28,47 +31,48 @@ def GNN_transform_data(df):
                     for graph, label in zip(X_test, y_test)]
 
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
     num_node_features=X['graph_data'].iloc[0].x.shape[1]
     num_edge_features=X['graph_data'].iloc[0].edge_attr.shape[1]
     return(X_train,X_test,y_train,y_test,train_loader,test_loader,num_edge_features,num_node_features)
 
 
+# Déplacez la définition de la classe GNN au niveau du module
+class GNN(torch.nn.Module):
+    def __init__(self, num_node_features, num_edge_features, hidden_channels, num_layers, dropout_rate):
+        super(GNN, self).__init__()
+        self.convs = torch.nn.ModuleList()
+        self.convs.append(GINEConv(torch.nn.Linear(num_node_features, hidden_channels), edge_dim=num_edge_features))
+        for _ in range(num_layers - 1):
+            self.convs.append(GINEConv(torch.nn.Linear(hidden_channels, hidden_channels), edge_dim=num_edge_features))
+        self.fc1 = torch.nn.Linear(hidden_channels, 64)
+        self.fc2 = torch.nn.Linear(64, 1)
+        self.dropout = torch.nn.Dropout(p=dropout_rate)
+
+        # Initialize weights
+        self.apply(self.init_weights)
+
+    def init_weights(self, m):
+        if isinstance(m, torch.nn.Linear):
+            torch.nn.init.xavier_uniform_(m.weight)
+            if m.bias is not None:
+                torch.nn.init.zeros_(m.bias)
+
+    def forward(self, data):
+        x, edge_index, batch, edge_attr = data.x, data.edge_index, data.batch, data.edge_attr
+        for conv in self.convs:
+            x = conv(x, edge_index, edge_attr)
+            x = F.gelu(x)
+            x = self.dropout(x)
+        x = global_mean_pool(x, batch)
+        x = F.gelu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+# Modifiez la fonction GNN_create_classes pour qu'elle retourne la classe définie au niveau du module
 def GNN_create_classes():
-    class GNN(torch.nn.Module):
-        def __init__(self, num_node_features, num_edge_features, hidden_channels, num_layers, dropout_rate):
-            super(GNN, self).__init__()
-            self.convs = torch.nn.ModuleList()
-            self.convs.append(GINEConv(torch.nn.Linear(num_node_features, hidden_channels), edge_dim=num_edge_features))
-            for _ in range(num_layers - 1):
-                self.convs.append(GINEConv(torch.nn.Linear(hidden_channels, hidden_channels), edge_dim=num_edge_features))
-            self.fc1 = torch.nn.Linear(hidden_channels, 64)
-            self.fc2 = torch.nn.Linear(64, 1)
-            self.dropout = torch.nn.Dropout(p=dropout_rate)
-
-            # Initialize weights
-            self.apply(self.init_weights)
-
-        def init_weights(self, m):
-            if isinstance(m, torch.nn.Linear):
-                torch.nn.init.xavier_uniform_(m.weight)
-                if m.bias is not None:
-                    torch.nn.init.zeros_(m.bias)
-
-        def forward(self, data):
-            x, edge_index, batch, edge_attr = data.x, data.edge_index, data.batch, data.edge_attr
-            for conv in self.convs:
-                x = conv(x, edge_index, edge_attr)
-                x = F.relu(x)
-                x = self.dropout(x)
-            x = global_mean_pool(x, batch)
-            x = F.relu(self.fc1(x))
-            x = self.fc2(x)
-            return x
-
     class GNNModel(BaseEstimator, ClassifierMixin):
-        def __init__(self, num_node_features, num_edge_features, hidden_channels=128, num_layers=2, dropout_rate=0.0, learning_rate=0.01, batch_size=64, epochs=50, weight_decay=0.0):
+        def __init__(self, num_node_features, num_edge_features, hidden_channels=128, num_layers=2, dropout_rate=0.2, learning_rate=0.01, batch_size=64, epochs=50, weight_decay=0.0):
             self.num_node_features = num_node_features
             self.num_edge_features = num_edge_features
             self.hidden_channels = hidden_channels
@@ -123,25 +127,25 @@ def GNN_create_classes():
             proba = self.predict_proba(X)
             return (proba >= 0.5).astype(int)  # Convert to binary predictions
 
-    return GNN,GNNModel
+    return GNN, GNNModel
+
 
 def GNN_find_best_params(GNNModel,X_train,X_test,y_train,y_test,num_node_features,num_edge_features):
     param_grid = {
-        'hidden_channels': [64,128, 256],  # Réduire à deux valeurs importantes
-        'learning_rate': [0.01,0.05, 0.001],  # Explorer deux valeurs typiques
-        'num_layers': [2, 3],  # Réduire à deux options
+        'hidden_channels': [64,128,256],  # Réduire à deux valeurs importantes
+        'learning_rate': [0.01,0.005, 0.001],  # Explorer deux valeurs typiques
+        'num_layers': [2, 3, 4],  # Réduire à deux options
     }
 
     # Scorer pour l'average precision
     scorer = make_scorer(average_precision_score, response_method='predict_proba')
-
 
     # GridSearchCV avec les paramètres réduits
         # GridSearchCV avec les paramètres réduits
     grid_search = GridSearchCV(GNNModel(num_node_features=num_node_features, num_edge_features=num_edge_features),
                             param_grid,
                             scoring=scorer,
-                            cv=2,  # 3-fold cross-validation
+                            cv=3,  # 3-fold cross-validation
                             verbose=3)
 
     # Exécuter la recherche en grille
@@ -171,22 +175,43 @@ def GNN_find_best_model(GNN,best_params,num_node_features,num_edge_features):
             num_edge_features=num_edge_features,
             hidden_channels=best_params['hidden_channels'],
             num_layers=best_params['num_layers'],
-            dropout_rate=0.0  # Supposons que le dropout_rate soit constant
+            dropout_rate=0.2  # Supposons que le dropout_rate soit constant
         )
     return model
 
+# def GNN_save_model(model, name_protein, nb_sample):
+#     """ Enregistre le meilleur modèle trouvé. """
+#     parent_dir = os.path.dirname(os.getcwd())
+#     model_path = os.path.join(parent_dir, f'drug_smile/raw_data/best_model_vector_SVC_{name_protein}_{nb_sample}.pkl\n')
+#     joblib.dump(model, model_path)
+#     print(f"\nModèle enregistré à : {model_path}")
+
 def GNN_save_model(model, name_protein, nb_sample):
     """ Enregistre le meilleur modèle trouvé. """
+    name_fichier_model = f"model_GNN_{name_protein}_{nb_sample}.pkl"
+    gcp_project = GCP_PROJECT
+    bucket_name = BUCKET_PROD_NAME
+    source_model_name = name_fichier_model
     parent_dir = os.path.dirname(os.getcwd())
-    model_path = os.path.join(parent_dir, f'drug_smile/raw_data/best_model_vector_SVC_{name_protein}_{nb_sample}.pkl\n')
-    joblib.dump(model, model_path)
-    print(f"\nModèle enregistré à : {model_path}")
+    destination_file_name = os.path.join(parent_dir, f'drug_smile/models/{name_fichier_model}')
+
+    # Télécharge le fichier localement
+    joblib.dump(model, destination_file_name)
+    print(f"\nModèle enregistré à : {destination_file_name}\n")
+
+    # Crée un client pour interagir avec GCS
+    storage_client = storage.Client(project=gcp_project)
+    # Accède au bucket spécifié
+    bucket = storage_client.bucket(bucket_name)
+    # Créer un nouvel objet blob dans le bucket
+    blob = bucket.blob(source_model_name)
+    # Télécharger le fichier local vers GCS
+    blob.upload_from_filename(destination_file_name)
+    print(f"\nModèle enregistré sur GCS dans le bucket {bucket_name}\n")
 
 
-
-def GNN_train(best_model,best_params,train_loader,test_loader):
-    # Utiliser les meilleurs hyperparamètres trouvés pour réentraîner le modèle si nécessaire
-    patience = 15
+def GNN_train(best_model, best_params, train_loader, test_loader):
+    patience = 20
     optimizer = torch.optim.Adam(best_model.parameters(), lr=best_params['learning_rate'])
     criterion = torch.nn.BCEWithLogitsLoss()
 
@@ -194,13 +219,14 @@ def GNN_train(best_model,best_params,train_loader,test_loader):
     val_losses = []
     average_precisions = []
     patience_counter = 0
+    best_val_loss = float('inf')
+    best_val_precision = 0.0
 
-    best_val_loss= float('inf')
+    # Pour sauvegarder les poids du meilleur modèle
+    best_model_state_dict = None
 
     for epoch in range(10000):
         best_model.train()
-        all_targets = []
-        all_outputs = []
         total_loss = 0
 
         for batch in train_loader:
@@ -212,9 +238,6 @@ def GNN_train(best_model,best_params,train_loader,test_loader):
             optimizer.step()
             total_loss += loss.item()
 
-            all_outputs.append(torch.sigmoid(out).detach().cpu().numpy())
-            all_targets.append(batch.y.cpu().numpy())
-
         avg_train_loss = total_loss / len(train_loader)
         train_losses.append(avg_train_loss)
 
@@ -224,7 +247,7 @@ def GNN_train(best_model,best_params,train_loader,test_loader):
         with torch.no_grad():
             all_val_targets = []
             all_val_outputs = []
-            for batch in test_loader:  # val_loader pour le set de validation
+            for batch in test_loader:
                 out = best_model(batch)
                 batch.y = batch.y.view(-1, 1)
                 loss = criterion(out, batch.y)
@@ -238,13 +261,26 @@ def GNN_train(best_model,best_params,train_loader,test_loader):
         avg_val_loss = val_loss / len(test_loader)
         val_losses.append(avg_val_loss)
         average_precisions.append(avg_val_precision)
-        if best_val_loss<avg_val_loss :
-            patience_counter +=1
-        else :
-            best_val_loss=avg_val_loss
-            patience_counter=0
+
+        # Comparer la perte de validation actuelle avec la meilleure observée
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            best_val_precision = avg_val_precision  # Mettre à jour la meilleure précision de validation
+            patience_counter = 0
+            # Sauvegarder les poids du meilleur modèle
+            best_model_state_dict = best_model.state_dict()
+        else:
+            patience_counter += 1
+
         if patience_counter >= patience:
             print(f"Early stopping at epoch {epoch+1}.")
             break
 
         print(f'Epoch {epoch+1}, Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}, Val Avg Precision: {avg_val_precision:.4f}')
+
+    # Charger les poids du meilleur modèle avant de retourner
+    if best_model_state_dict is not None:
+        best_model.load_state_dict(best_model_state_dict)
+
+    # Retourner le modèle avec les meilleurs poids et la meilleure précision de validation
+    return best_model, best_val_precision

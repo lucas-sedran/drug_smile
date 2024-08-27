@@ -19,7 +19,7 @@ def vect_split_data(df):
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.3, random_state=RANDOM_STATE)
     return X_train, X_val, y_train, y_val
 
-def vect_train_and_evaluate(X_train, X_val, y_train, y_val):
+def vect_Grid_Search(X_train, X_val, y_train, y_val):
     """ Entraîne plusieurs modèles en utilisant GridSearch et évalue leurs performances. """
     param_grid = {
         'Logistic Regression': {
@@ -72,12 +72,45 @@ def vect_train_and_evaluate(X_train, X_val, y_train, y_val):
         name_protein = NAME_PROTEIN
         nb_sample = NB_SAMPLE
         vect_save_model(name_model.replace(" ", "_"), model, name_protein, nb_sample)
-        save_param_model(name_model, ap_score, grid.best_params_)
+        save_param_model(name_model + ' (vect)', ap_score, grid.best_params_)
 
         print(classification_report(y_val, y_pred))
         print('------------------------------------------------------------')
 
     return best_model, best_name_model
+
+
+def vect_train_and_evaluate(name_model, X_train, X_val, y_train, y_val):
+    if name_model == 'Logistic Regression':
+        # Définir le modèle avec C=10
+        model = LogisticRegression(C=10, max_iter=1000, solver='lbfgs')
+
+    # Entraîner le modèle
+    model.fit(X_train, y_train)
+
+    # Prédictions de probabilités
+    y_proba = model.predict_proba(X_val)[:, 1]
+
+    # Calcul de l'AP score
+    ap_score = average_precision_score(y_val, y_proba)
+
+    # Affichage des résultats
+    print('\n------------------------------------------------------------')
+    print("Logistic Regression avec C=10:")
+    print(f"  - Average Precision: {ap_score:.4f}")
+
+    # Prédictions
+    y_pred = model.predict(X_val)
+
+    # Sauvegarder le modèle
+    vect_save_model(name_model.replace(" ", "_"), model, NAME_PROTEIN, NB_SAMPLE)
+    save_param_model(name_model + ' (vect)', ap_score, {'C': 10})
+
+    # Affichage du rapport de classification
+    print(classification_report(y_val, y_pred))
+    print('------------------------------------------------------------')
+
+    return model, name_model.replace(" ", "_")
 
 def vect_save_model(name_model, model, name_protein, nb_sample):
     """ Enregistre le meilleur modèle trouvé. """
@@ -127,18 +160,15 @@ def save_param_model(name_model, ap_score, best_params_):
     else:
         # Si le fichier n'existe pas, initialiser un dictionnaire vide
         ours_models = {}
-
     # Nouvelles informations à ajouter
     nouvelles_infos = {
-        (f"{name_model} {NB_SAMPLE}"): {"Average Precision": round(float(ap_score), 4), "Parameters": best_params_}
+        (f"{name_model} {NAME_PROTEIN} {NB_SAMPLE}"): {"Average Precision": round(float(ap_score), 4), "Parameters": best_params_}
     }
-
     # Mise à jour du dictionnaire existant avec les nouvelles informations
     ours_models.update(nouvelles_infos)
-
     # Créer le répertoire 'models' s'il n'existe pas encore
     os.makedirs(os.path.dirname(chemin_fichier_local), exist_ok=True)
-
+    
     # Sauvegarder le dictionnaire mis à jour localement
     with open(chemin_fichier_local, 'wb') as fichier:
         pickle.dump(ours_models, fichier)
