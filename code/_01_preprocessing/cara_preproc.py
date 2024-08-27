@@ -19,8 +19,12 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.compose import make_column_selector
-from sklearn.pipeline import Pipeline, make_pipeline
+from sklearn.pipeline import Pipeline
 from code.params import *
+from google.cloud import storage
+
+from code._01_preprocessing.vect_preproc import vect_load_data, vect_clean_data
+
 
 
 ## Creation of function to agregate each descriptor of each molecule
@@ -29,6 +33,55 @@ def calculate_descriptors(molecule_rdkit):
     for descriptor_name, function in Descriptors.descList:
         descriptors[descriptor_name] = function(molecule_rdkit)
     return descriptors
+
+
+def cara_check_and_process_file():
+    name_file = f"df_cara_preproc_{NAME_PROTEIN}_{NB_SAMPLE}.pkl"
+    source_blob_name = f"echantillons/{name_file}"
+    # Initialiser le client Google Cloud Storage
+    storage_client = storage.Client(project=GCP_PROJECT)
+    bucket = storage_client.bucket(BUCKET_DATA_NAME)
+    blob = bucket.blob(source_blob_name)
+
+    parent_dir = os.path.dirname(os.getcwd())
+    destination_file_name = os.path.join(parent_dir, f'drug_smile/raw_data/{name_file}')
+
+    # Vérifier si le fichier existe dans le bucket
+    if blob.exists():
+        if os.path.exists(destination_file_name):
+            print(f"Le fichier {name_file} existe déjà en local. Transformation en DataFrame en cours...")
+            # Charger le fichier en DataFrame
+            df_processed = pd.read_pickle(destination_file_name)
+        else:
+            print(f"Le fichier {name_file} existe déjà dans le bucket. Téléchargement en cours...")
+            # Télécharger le fichier du bucket
+            blob.download_to_filename(name_file)
+            # Charger le fichier en DataFrame
+            df_processed = pd.read_pickle(name_file)
+
+        print(f"Le fichier {name_file} a été chargé en DataFrame.")
+    else:
+        print(f"Le fichier {name_file} n'existe pas dans le bucket. Sauvegarde en cours...")
+
+        df = vect_load_data(NAME_PROTEIN,NB_SAMPLE)
+        df = vect_clean_data(df)
+        df_chunks = []
+        for start in range(0, len(df), CHUNK_SIZE):
+            chunk = df.iloc[start:start + CHUNK_SIZE]
+            chunk_updated = process_chunk(chunk)
+            df_chunks.append(chunk_updated)
+        # Concatenate all chunks
+        df_processed = pd.concat(df_chunks, ignore_index=True)
+
+        # Sauvegarder df_processed en fichier .pkl localement
+        df_processed.to_pickle(destination_file_name)
+        print(f"Le fichier {name_file} a été sauvegardé localement.")
+
+        # Uploader le fichier .pkl sur le bucket
+        blob.upload_from_filename(destination_file_name)
+        print(f"Le fichier {name_file} a été sauvegardé dans le bucket.")
+
+    return df_processed
 
 
 def process_chunk(chunk):
@@ -43,20 +96,14 @@ def process_chunk(chunk):
 
     return chunk_updated
 
-def cara_preprocess_data(df, chunk_size=CHUNK_SIZE):
-    df_chunks = []
 
-    for start in range(0, len(df), chunk_size):
-        chunk = df.iloc[start:start + chunk_size]
-        chunk_updated = process_chunk(chunk)
-        df_chunks.append(chunk_updated)
+def cara_preprocess_data():
 
-    # Concatenate all chunks
-    chunk_updated = pd.concat(df_chunks, ignore_index=True)
+    df_processed = cara_check_and_process_file()
 
     # Drop 'binds' and 'molecule_rdkit' columns
-    X = chunk_updated.drop(['binds', 'molecule_rdkit'], axis=1)
-    y = chunk_updated['binds']
+    X = df_processed.drop(['binds', 'molecule_rdkit'], axis=1)
+    y = df_processed['binds']
 
     # replace inf values by nan
     X.replace([np.inf, -np.inf], np.nan, inplace=True)
