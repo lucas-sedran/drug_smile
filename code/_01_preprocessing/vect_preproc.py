@@ -79,7 +79,7 @@ def vect_preprocess_data(df, chunk_size=CHUNK_SIZE):
     print(f"------------------- FINISHED processing all chunks -------------------")
     return df_processed
 
-def check_and_process_file():
+def vect_check_and_process_file():
     name_file = f"df_vect_preproc_{NAME_PROTEIN}_{NB_SAMPLE}.pkl"
     source_blob_name = f"echantillons/{name_file}"
     # Initialiser le client Google Cloud Storage
