@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, Request,File,HTTPException,Form
 import pandas as pd
-from drug_smile._01_preprocessing import *
+#from drug_smile._01_preprocessing import *
 import io
 import joblib
 from drug_smile.params import *
@@ -20,6 +20,10 @@ def root():
 
 
 def load_model(name_file):
+
+
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = CREDENTIALS_PATH
+
 
     # Create folders models if not exist
     if not os.path.isdir(MODELS_PATH):

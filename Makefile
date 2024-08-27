@@ -25,5 +25,4 @@ get_cara_model:
 
 #################### API #########################
 run_api_8010:
-	uvicorn code.api.api:app --host 127.0.0.1 --port 8010 --reload
-
+	uvicorn drug_smile.api.api:app --host 127.0.0.1 --port 8010 --reload
