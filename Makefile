@@ -7,6 +7,9 @@ get_and_save_little_samples:
 get_vecteurs_Grid_Search:
 	python -c "from code._02_model_train.registry import main_vect_Grid_search; main_vect_Grid_search(name_protein='${NAME_PROTEIN}',nb_sample='${NB_SAMPLE}')"
 
+get_vecteurs_preproc:
+	python -c "from code._01_preprocessing.vect_preproc import check_and_process_file; check_and_process_file()"
+
 get_vecteurs_model:
 	python -c "from code._02_model_train.registry import main_vecteurs; main_vecteurs(name_protein='${NAME_PROTEIN}',nb_sample='${NB_SAMPLE}')"
 

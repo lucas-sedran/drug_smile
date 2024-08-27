@@ -4,6 +4,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from google.cloud import storage
 from code.params import *
+from tqdm import tqdm
 
 def download_blob(gcp_project, bucket_name, source_blob_name, destination_file_name):
     """Downloads a blob from the bucket."""
@@ -86,15 +87,22 @@ def check_and_process_file():
     bucket = storage_client.bucket(BUCKET_DATA_NAME)
     blob = bucket.blob(source_blob_name)
 
+    parent_dir = os.path.dirname(os.getcwd())
+    destination_file_name = os.path.join(parent_dir, f'drug_smile/raw_data/{name_file}')
+
     # Vérifier si le fichier existe dans le bucket
     if blob.exists():
-        print(f"Le fichier {name_file} existe déjà dans le bucket. Téléchargement en cours...")
+        if os.path.exists(destination_file_name):
+            print(f"Le fichier {name_file} existe déjà en local. Transformation en DataFrame en cours...")
+            # Charger le fichier en DataFrame
+            df = pd.read_pickle(destination_file_name)
+        else:
+            print(f"Le fichier {name_file} existe déjà dans le bucket. Téléchargement en cours...")
+            # Télécharger le fichier du bucket
+            blob.download_to_filename(name_file)
+            # Charger le fichier en DataFrame
+            df = pd.read_pickle(name_file)
 
-        # Télécharger le fichier du bucket
-        blob.download_to_filename(name_file)
-
-        # Charger le fichier en DataFrame
-        df = pd.read_pickle(name_file)
         print(f"Le fichier {name_file} a été chargé en DataFrame.")
     else:
         print(f"Le fichier {name_file} n'existe pas dans le bucket. Sauvegarde en cours...")
@@ -105,9 +113,8 @@ def check_and_process_file():
         df_processed = vect_preprocess_data(df)
 
         # Sauvegarder df_processed en fichier .pkl localement
-        parent_dir = os.path.dirname(os.getcwd())
-        destination_file_name = os.path.join(parent_dir, f'drug_smile/raw_data/{name_file}')
         df_processed.to_pickle(destination_file_name)
+        print(f"Le fichier {name_file} a été sauvegardé localement.")
 
         # Uploader le fichier .pkl sur le bucket
         blob.upload_from_filename(destination_file_name)
