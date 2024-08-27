@@ -1,7 +1,6 @@
 # Environnement #
 .env
 .python-version
-
 # OS generated files #
 **.DS_Store
 __MACOSX
@@ -22,3 +21,4 @@ raw_data/
 
 # Models #
 *.pkl
+nohup.out

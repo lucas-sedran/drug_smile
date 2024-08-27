@@ -4,6 +4,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from google.cloud import storage
 from code.params import *
+from tqdm import tqdm
 
 def download_blob(gcp_project, bucket_name, source_blob_name, destination_file_name):
     """Downloads a blob from the bucket."""
@@ -53,8 +54,73 @@ def vect_generate_ecfp(molecule, radius=2, bits=1024):
     fingerprint = AllChem.GetMorganFingerprintAsBitVect(molecule, radius, nBits=bits)
     return list(fingerprint)
 
-def vect_preprocess_data(df):
-    """ Applique le prétraitement sur le DataFrame : convertit les SMILES en objets RDKit et génère les ECFP. """
-    df['molecule'] = df['molecule_smiles'].apply(Chem.MolFromSmiles)
-    df['ecfp'] = df['molecule'].apply(vect_generate_ecfp)
+def vect_preprocess_data(df, chunk_size=CHUNK_SIZE):
+    """Applique le prétraitement sur le DataFrame par chunks : convertit les SMILES en objets RDKit et génère les ECFP."""
+    print(f"------------------- START smile transformation into molecule -------------------")
+
+    df_chunks = []
+
+    # Découpe du DataFrame en chunks
+    for i in range(0, len(df), chunk_size):
+        chunk = df.iloc[i:i + chunk_size].copy()
+        print(f"Processing chunk {i // chunk_size + 1}")
+
+        # Transformation des SMILES en molécules RDKit
+        chunk['molecule'] = chunk['molecule_smiles'].apply(Chem.MolFromSmiles)
+        print(f"------------------- START molecule transformation into ECFP for chunk {i // chunk_size + 1} -------------------")
+
+        # Génération des ECFP
+        chunk['ecfp'] = chunk['molecule'].apply(vect_generate_ecfp)
+        print(f"------------------- STOP molecule transformation into ECFP for chunk {i // chunk_size + 1} -------------------")
+        df_chunks.append(chunk)
+
+    # Concatenation de tous les chunks
+    df_processed = pd.concat(df_chunks, ignore_index=True)
+    print(f"------------------- FINISHED processing all chunks -------------------")
+    return df_processed
+
+def check_and_process_file():
+    name_file = f"df_vect_preproc_{NAME_PROTEIN}_{NB_SAMPLE}.pkl"
+    source_blob_name = f"echantillons/{name_file}"
+    # Initialiser le client Google Cloud Storage
+    storage_client = storage.Client(project=GCP_PROJECT)
+    bucket = storage_client.bucket(BUCKET_DATA_NAME)
+    blob = bucket.blob(source_blob_name)
+
+    parent_dir = os.path.dirname(os.getcwd())
+    destination_file_name = os.path.join(parent_dir, f'drug_smile/raw_data/{name_file}')
+
+    # Vérifier si le fichier existe dans le bucket
+    if blob.exists():
+        if os.path.exists(destination_file_name):
+            print(f"Le fichier {name_file} existe déjà en local. Transformation en DataFrame en cours...")
+            # Charger le fichier en DataFrame
+            df = pd.read_pickle(destination_file_name)
+        else:
+            print(f"Le fichier {name_file} existe déjà dans le bucket. Téléchargement en cours...")
+            # Télécharger le fichier du bucket
+            blob.download_to_filename(name_file)
+            # Charger le fichier en DataFrame
+            df = pd.read_pickle(name_file)
+
+        print(f"Le fichier {name_file} a été chargé en DataFrame.")
+    else:
+        print(f"Le fichier {name_file} n'existe pas dans le bucket. Sauvegarde en cours...")
+
+        # On réalise le préprocessing
+        df = vect_load_data(NAME_PROTEIN,NB_SAMPLE)
+        df = vect_clean_data(df)
+        df_processed = vect_preprocess_data(df)
+
+        # Sauvegarder df_processed en fichier .pkl localement
+        df_processed.to_pickle(destination_file_name)
+        print(f"Le fichier {name_file} a été sauvegardé localement.")
+
+        # Uploader le fichier .pkl sur le bucket
+        blob.upload_from_filename(destination_file_name)
+        print(f"Le fichier {name_file} a été sauvegardé dans le bucket.")
+
+        # Charger le DataFrame pour un éventuel traitement ultérieur
+        df = df_processed
+
     return df

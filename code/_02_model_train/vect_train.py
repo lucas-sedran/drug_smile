@@ -19,7 +19,7 @@ def vect_split_data(df):
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.3, random_state=RANDOM_STATE)
     return X_train, X_val, y_train, y_val
 
-def vect_train_and_evaluate(X_train, X_val, y_train, y_val):
+def vect_Grid_Search(X_train, X_val, y_train, y_val):
     """ Entraîne plusieurs modèles en utilisant GridSearch et évalue leurs performances. """
     param_grid = {
         'Logistic Regression': {
@@ -72,12 +72,45 @@ def vect_train_and_evaluate(X_train, X_val, y_train, y_val):
         name_protein = NAME_PROTEIN
         nb_sample = NB_SAMPLE
         vect_save_model(name_model.replace(" ", "_"), model, name_protein, nb_sample)
-        save_param_model(name_model, ap_score, grid.best_params_)
+        save_param_model(name_model + ' (vect)', ap_score, grid.best_params_)
 
         print(classification_report(y_val, y_pred))
         print('------------------------------------------------------------')
 
     return best_model, best_name_model
+
+
+def vect_train_and_evaluate(name_model, X_train, X_val, y_train, y_val):
+    if name_model == 'Logistic Regression':
+        # Définir le modèle avec C=10
+        model = LogisticRegression(C=10, max_iter=1000, solver='lbfgs')
+
+    # Entraîner le modèle
+    model.fit(X_train, y_train)
+
+    # Prédictions de probabilités
+    y_proba = model.predict_proba(X_val)[:, 1]
+
+    # Calcul de l'AP score
+    ap_score = average_precision_score(y_val, y_proba)
+
+    # Affichage des résultats
+    print('\n------------------------------------------------------------')
+    print("Logistic Regression avec C=10:")
+    print(f"  - Average Precision: {ap_score:.4f}")
+
+    # Prédictions
+    y_pred = model.predict(X_val)
+
+    # Sauvegarder le modèle
+    vect_save_model(name_model.replace(" ", "_"), model, NAME_PROTEIN, NB_SAMPLE)
+    save_param_model(name_model + ' (vect)', ap_score, {'C': 10})
+
+    # Affichage du rapport de classification
+    print(classification_report(y_val, y_pred))
+    print('------------------------------------------------------------')
+
+    return model, name_model.replace(" ", "_")
 
 def vect_save_model(name_model, model, name_protein, nb_sample):
     """ Enregistre le meilleur modèle trouvé. """
@@ -102,18 +135,21 @@ def vect_save_model(name_model, model, name_protein, nb_sample):
     blob.upload_from_filename(destination_file_name)
     print(f"\nModèle enregistré sur GCS dans le bucket {bucket_name}\n")
 
+
 def save_param_model(name_model, ap_score, best_params_):
     # Définir les variables nécessaires
     chemin_fichier_local = "models/ours_models.pkl"
     gcp_project = GCP_PROJECT
     bucket_name = BUCKET_PROD_NAME
     name_fichier_model = "ours_models.pkl"
+
     # Crée un client pour interagir avec GCS
     storage_client = storage.Client(project=gcp_project)
     # Accède au bucket spécifié
     bucket = storage_client.bucket(bucket_name)
     # Créer un nouvel objet blob pour interagir avec le fichier sur GCS
     blob = bucket.blob(name_fichier_model)
+
     # Vérifier si le fichier existe dans le bucket GCS
     if blob.exists():
         # Télécharger le fichier depuis le bucket GCS vers le répertoire local temporaire
@@ -132,9 +168,11 @@ def save_param_model(name_model, ap_score, best_params_):
     ours_models.update(nouvelles_infos)
     # Créer le répertoire 'models' s'il n'existe pas encore
     os.makedirs(os.path.dirname(chemin_fichier_local), exist_ok=True)
+    
     # Sauvegarder le dictionnaire mis à jour localement
     with open(chemin_fichier_local, 'wb') as fichier:
         pickle.dump(ours_models, fichier)
+
     # Uploader le fichier mis à jour dans le bucket GCS
     blob.upload_from_filename(chemin_fichier_local)
     print(f"\nModèle mis à jour et enregistré sur GCS dans le bucket {bucket_name}\n")
