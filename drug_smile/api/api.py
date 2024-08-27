@@ -1,9 +1,9 @@
 from fastapi import FastAPI, UploadFile, Request,File,HTTPException,Form
 import pandas as pd
-from code._01_preprocessing import *
+from drug_smile._01_preprocessing import *
 import io
 import joblib
-from code.params import *
+from drug_smile.params import *
 from google.cloud import storage
 
 app = FastAPI()
