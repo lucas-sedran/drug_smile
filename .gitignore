@@ -18,6 +18,7 @@ notebooks/
 
 # Dossier perso #
 raw_data/
+models/
 
 # Models #
 *.pkl

@@ -24,5 +24,6 @@ get_cara_model:
 	python -c "from code._02_model_train.registry import main_cara; main_cara(name_protein='${NAME_PROTEIN}',nb_sample='${NB_SAMPLE}')"
 
 #################### API #########################
-run_api:
-	uvicorn code.api.api:app --reload
+run_api_8010:
+	uvicorn code.api.api:app --host 127.0.0.1 --port 8010 --reload
+
