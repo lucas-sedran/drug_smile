@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, Request,File,HTTPException,Form
 import pandas as pd
+from code._01_preprocessing import *
 import io
 import joblib
 from code.params import *
@@ -76,6 +77,7 @@ async def predict( model_name: str = Form(...) ,file : UploadFile = File(...)):
     print(df)
 
     print(model_name)
+
     if model_name == "Logistic Regression":
         model = app.state.model_vect_Logistic_Regression_BRD4_all
         preproc_df = vect_preprocess_data(df)
