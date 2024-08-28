@@ -99,9 +99,11 @@ def vect_check_and_process_file():
         else:
             print(f"Le fichier {name_file} existe déjà dans le bucket. Téléchargement en cours...")
             # Télécharger le fichier du bucket
+
             blob.download_to_filename(destination_file_name)
             # Charger le fichier en DataFrame
             df = pd.read_pickle(destination_file_name)
+
 
         print(f"Le fichier {name_file} a été chargé en DataFrame.")
     else:

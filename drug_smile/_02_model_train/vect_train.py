@@ -84,6 +84,7 @@ def vect_train_and_evaluate(name_model, X_train, X_val, y_train, y_val):
     if name_model == 'Logistic Regression':
         # Définir le modèle avec C=10
         model = LogisticRegression(C=10, max_iter=1000, solver='lbfgs')
+
         params = "C=10, max_iter=1000, solver='lbfgs'"
     elif name_model == 'Random Forest':
         # Définir le modèle avec C=10
@@ -101,7 +102,9 @@ def vect_train_and_evaluate(name_model, X_train, X_val, y_train, y_val):
 
     # Affichage des résultats
     print('\n------------------------------------------------------------')
+
     print(f"{name_model} avec {params}:")
+
     print(f"  - Average Precision: {ap_score:.4f}")
 
     # Prédictions

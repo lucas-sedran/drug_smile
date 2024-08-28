@@ -1,5 +1,6 @@
 # Environnement #
 .env
+.env.yaml
 .python-version
 # OS generated files #
 **.DS_Store
