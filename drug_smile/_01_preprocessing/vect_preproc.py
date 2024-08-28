@@ -3,7 +3,7 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from google.cloud import storage
-from code.params import *
+from drug_smile.params import *
 from tqdm import tqdm
 
 def download_blob(gcp_project, bucket_name, source_blob_name, destination_file_name):
@@ -99,9 +99,11 @@ def vect_check_and_process_file():
         else:
             print(f"Le fichier {name_file} existe déjà dans le bucket. Téléchargement en cours...")
             # Télécharger le fichier du bucket
-            blob.download_to_filename(name_file)
+
+            blob.download_to_filename(destination_file_name)
             # Charger le fichier en DataFrame
-            df = pd.read_pickle(name_file)
+            df = pd.read_pickle(destination_file_name)
+
 
         print(f"Le fichier {name_file} a été chargé en DataFrame.")
     else:

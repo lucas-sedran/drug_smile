@@ -8,3 +8,4 @@ fastparquet
 uvicorn
 fastapi
 python-multipart
+ipykernel

@@ -1,9 +1,14 @@
 FROM python:3.10.6-buster
 
-COPY requirements.txt requirements.txt
-RUN pip install -r --no-cache-dir requirements.txt
+WORKDIR /drug_smile
 
-COPY code._01_preprocessing code._01_preprocessing
-COPY code.api code.api
+RUN pip install --upgrade pip
 
-CMD uvicorn code.api.api:app --host 0.0.0.0 --port $PORT
+COPY requirements_api.txt requirements_api.txt
+RUN pip install --no-cache-dir -r requirements_api.txt
+
+COPY drug_smile/api drug_smile/api
+COPY drug_smile/params.py drug_smile/params.py
+
+
+CMD uvicorn drug_smile.api.api:app --host 0.0.0.0 --port 8010

@@ -1,7 +1,7 @@
 from sklearn.svm import SVC
 from sklearn.metrics import average_precision_score, classification_report
-from code._02_model_train.vect_train import save_param_model
-from code.params import *
+from drug_smile._02_model_train.vect_train import save_param_model
+from drug_smile.params import *
 import joblib
 from google.cloud import storage
 
