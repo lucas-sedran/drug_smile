@@ -11,6 +11,7 @@ import pickle
 
 app = FastAPI()
 
+
 @app.get("/ping")
 def home():
     return {"message":"pong"}
@@ -20,7 +21,6 @@ def home():
 @app.get("/")
 def root():
     return {'message': 'Hello'}
-
 
 def load_model(name_file):
 
@@ -94,8 +94,10 @@ async def predict( model_name: str = Form(...) ,file : UploadFile = File(...)):
 
     print(model_name)
 
+
     if model_name == "Logistic Regression":
         model = app.state.model_vect_Logistic_Regression_BRD4_all
+
         preproc_df = vect_preprocess_data(df)
         X = preproc_df['ecfp'].tolist()
         prediction = model.predict(X)
@@ -108,6 +110,7 @@ async def predict( model_name: str = Form(...) ,file : UploadFile = File(...)):
     if model_name == "GNN":
         model = app.state.model_GNN_BRD4_all
         return { "message" : "From API : GNN Loaded !!!!!"}
+
 
 
     return {"message":"Parquet received","columns": df.columns.tolist(),"model_selected":model_name}

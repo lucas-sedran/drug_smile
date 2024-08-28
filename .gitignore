@@ -24,3 +24,5 @@ models/
 # Models #
 *.pkl
 nohup.out
+
+**.egg-info/
