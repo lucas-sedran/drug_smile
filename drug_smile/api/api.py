@@ -5,6 +5,9 @@ import io
 import joblib
 from drug_smile.params import *
 from google.cloud import storage
+import os
+import pickle
+
 
 app = FastAPI()
 
@@ -42,19 +45,26 @@ def load_model(name_file):
         blob = bucket.blob(name_file)
         try:
             blob.download_to_filename(model_path)
-            print("✅ model downloaded from cloud storage")
+            print(f"✅ model {name_file} downloaded from cloud storage")
         except:
             print(f"\n❌ No {name_file} found in GCS bucket {BUCKET_PROD_NAME} ❌")
             os.remove(model_path)
 
             return None
     else :
-        print("Model already in local folder")
+        print(f"Model {name_file} already in local folder")
         pass
-    try:
-        model = joblib.load(model_path)
+    """ try:
+        print(f'*'*10)
+        print(f'{model_path = }')
+        print(os.path.exists(model_path))
+        print(f'-'*10)
+
+        model = pickle.load(open(model_path,'rb'))
     except Exception:
-        raise HTTPException(status_code=500, detail=f" ### Unable to load model {name_file} ###")
+        raise HTTPException(status_code=500, detail=f" ### Unable to load model {name_file} from {model_path = } ###") """
+    model = joblib.load(open(model_path,'rb'))
+
     return model
 
 
@@ -65,11 +75,13 @@ async def startup_event():
     print(" Startup API =) ")
     print("*"*50)
 
-    name_file = "model_vect_Logistic_Regression_BRD4_all.pkl"
+    """ name_file = "model_vect_Logistic_Regression_BRD4_all.pkl"
     app.state.model_vect_Logistic_Regression_BRD4_all = load_model(name_file)
+    print(f'✔️✔️✔️{name_file} loaded✔️✔️✔️') """
 
     name_file = "model_GNN_BRD4_all.pkl"
     app.state.model_GNN_BRD4_all = load_model(name_file)
+    print(f'✔️✔️✔️{name_file} loaded✔️✔️✔️')
 
 
 
