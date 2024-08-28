@@ -20,10 +20,10 @@ from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.compose import make_column_selector
 from sklearn.pipeline import Pipeline
-from code.params import *
+from drug_smile.params import *
 from google.cloud import storage
 
-from code._01_preprocessing.vect_preproc import vect_load_data, vect_clean_data
+from drug_smile._01_preprocessing.vect_preproc import vect_load_data, vect_clean_data
 
 
 
