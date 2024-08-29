@@ -5,6 +5,9 @@ from drug_smile._01_preprocessing.vect_preproc import vect_preprocess_data
 from drug_smile._02_model_train.GNN_train import GNN_smiles_to_graph
 from rdkit import Chem
 from rdkit.Chem import Draw
+import torch
+from torch_geometric.data import Data
+import numpy as np
 
 def from_smile_to_viz(mol):
     img = Draw.MolToImage(mol)
@@ -29,6 +32,9 @@ def model_vect_predictions(df,name_model):
 
         # Prédictions
         y_pred_temp = model.predict(X)
+        # y_prob = model.predict_proba(X)[:, 1]
+        # threshold = 0.7
+        # y_pred_temp = (y_prob >= threshold).astype(int)
         print(f"Prédiction {name_protein} : {y_pred_temp}")
         y_pred_temp = pd.DataFrame(y_pred_temp, columns=[name_protein])
         df_concatenated_temps = pd.concat([df_concatenated_temps, y_pred_temp], axis=1)
@@ -65,7 +71,7 @@ def model_GNN_predictions(df, name_model):
     X = preproc_df
     print("Préproc done")
     # DataFrame pour stocker les prédictions finales
-    df_concatenated_temps = pd.DataFrame(index=df.index)
+    df_concatenated_temps = df
     # Boucle sur les protéines
     for name_protein in ['BRD4', 'HSA', 'sEH']:
         # Charger le modèle
@@ -75,7 +81,6 @@ def model_GNN_predictions(df, name_model):
         if os.path.exists(chemin_fichier):
             model = joblib.load(chemin_fichier)
             print(f"----- {model_name} model loaded -----")
-            # Utiliser predict_proba si c'est un GNNModel
             y_pred_temp = predict_with_gnn(model, X)
             print(f"Prédiction {name_protein} : {y_pred_temp}")
             y_pred_temp = pd.DataFrame(y_pred_temp, columns=[name_protein], index=df.index)
@@ -90,7 +95,7 @@ if __name__ == "__main__":
     parent_dir = os.path.dirname(os.getcwd())
     file_path = os.path.join(parent_dir, f'drug_smile/raw_data/test_5.parquet')
     df = pd.read_parquet(file_path)
-    model_name = "GNN" #Logistic Regression #GNN
+    model_name = "Logistic Regression" #Logistic Regression #GNN
     df_result = process_model_predictions(df, model_name)
     # Affichage des résultats
     print(df_result)
