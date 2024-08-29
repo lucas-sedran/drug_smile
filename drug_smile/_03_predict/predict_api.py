@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import joblib
 from drug_smile._01_preprocessing.vect_preproc import vect_preprocess_data
+
 from drug_smile._02_model_train.GNN_train import GNN_smiles_to_graph
 from rdkit import Chem
 from rdkit.Chem import Draw
@@ -9,6 +10,7 @@ from rdkit.Chem import Draw
 def from_smile_to_viz(mol):
     img = Draw.MolToImage(mol)
     return img
+
 
 def model_vect_predictions(df,name_model):
     # Préproc
@@ -18,6 +20,7 @@ def model_vect_predictions(df,name_model):
     X = preproc_df['ecfp'].tolist()  # Convertir la colonne 'ecfp' en liste de listes
     df_concatenated_temps = preproc_df
 
+
     # Boucle sur les protéines
     for name_protein in ['BRD4', 'HSA', 'sEH']:
         # Charger le modèle
@@ -26,6 +29,7 @@ def model_vect_predictions(df,name_model):
         chemin_fichier = os.path.join(parent_dir, f"drug_smile/models/{model_name}.pkl")
         model = joblib.load(chemin_fichier)
         print(f"----- {model_name} model loaded -----")
+
 
         # Prédictions
         y_pred_temp = model.predict(X)
@@ -85,12 +89,15 @@ def model_GNN_predictions(df, name_model):
     return df_concatenated_temps
 
 
+
 if __name__ == "__main__":
     # Exemple d'utilisation de la fonction
     parent_dir = os.path.dirname(os.getcwd())
     file_path = os.path.join(parent_dir, f'drug_smile/raw_data/test_5.parquet')
     df = pd.read_parquet(file_path)
+
     model_name = "GNN" #Logistic Regression #GNN
+
     df_result = process_model_predictions(df, model_name)
     # Affichage des résultats
     print(df_result)
