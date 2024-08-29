@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import joblib
 from drug_smile._01_preprocessing.vect_preproc import vect_preprocess_data
+
 from drug_smile._02_model_train.GNN_train import GNN_smiles_to_graph
 from rdkit import Chem
 from rdkit.Chem import Draw
@@ -13,6 +14,7 @@ def from_smile_to_viz(mol):
     img = Draw.MolToImage(mol)
     return img
 
+
 def model_vect_predictions(df,name_model):
     # Préproc
     preproc_df = vect_preprocess_data(df)
@@ -20,6 +22,7 @@ def model_vect_predictions(df,name_model):
     # Predict
     X = preproc_df['ecfp'].tolist()  # Convertir la colonne 'ecfp' en liste de listes
     df_concatenated_temps = preproc_df
+
 
     # Boucle sur les protéines
     for name_protein in ['BRD4', 'HSA', 'sEH']:
@@ -29,6 +32,7 @@ def model_vect_predictions(df,name_model):
         chemin_fichier = os.path.join(parent_dir, f"drug_smile/models/{model_name}.pkl")
         model = joblib.load(chemin_fichier)
         print(f"----- {model_name} model loaded -----")
+
 
         # Prédictions
         y_pred_temp = model.predict(X)
@@ -88,6 +92,7 @@ def model_GNN_predictions(df, name_model):
         else:
             print(f"Le modèle pour {name_protein} n'a pas été trouvé à l'emplacement : {chemin_fichier}")
     return df_concatenated_temps
+
 
 
 if __name__ == "__main__":

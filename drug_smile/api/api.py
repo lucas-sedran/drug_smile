@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, Request,File,HTTPException,Form
 import pandas as pd
-#from drug_smile._01_preprocessing import *
+from drug_smile._03_predict.predict_api import process_model_predictions
 import io
 import joblib
 from drug_smile.params import *
@@ -54,17 +54,10 @@ def load_model(name_file):
     else :
         print(f"Model {name_file} already in local folder")
         pass
-    """ try:
-        print(f'*'*10)
-        print(f'{model_path = }')
-        print(os.path.exists(model_path))
-        print(f'-'*10)
-
-        model = pickle.load(open(model_path,'rb'))
+    try:
+        model = joblib.load(open(model_path,'rb'))
     except Exception:
-        raise HTTPException(status_code=500, detail=f" ### Unable to load model {name_file} from {model_path = } ###") """
-    model = joblib.load(open(model_path,'rb'))
-
+        raise HTTPException(status_code=500, detail=f" ### Unable to load model {name_file} from {model_path = } ###")
     return model
 
 
@@ -75,12 +68,36 @@ async def startup_event():
     print(" Startup API =) ")
     print("*"*50)
 
-    """ name_file = "model_vect_Logistic_Regression_BRD4_all.pkl"
+    #Binary
+    name_file = "model_vect_Logistic_Regression_BRD4_all.pkl"
+    print(f"Loading {name_file} ...")
     app.state.model_vect_Logistic_Regression_BRD4_all = load_model(name_file)
-    print(f'✔️✔️✔️{name_file} loaded✔️✔️✔️') """
+    print(f'✔️✔️✔️{name_file} loaded✔️✔️✔️')
 
+    name_file = "model_vect_Logistic_Regression_HSA_all.pkl"
+    print(f"Loading {name_file} ...")
+    app.state.model_vect_Logistic_Regression_HSA_all = load_model(name_file)
+    print(f'✔️✔️✔️{name_file} loaded✔️✔️✔️')
+
+    name_file = "model_vect_Logistic_Regression_sEH_all.pkl"
+    print(f"Loading {name_file} ...")
+    app.state.model_vect_Logistic_Regression_sEH_all = load_model(name_file)
+    print(f'✔️✔️✔️{name_file} loaded✔️✔️✔️')
+
+    #Graphs
     name_file = "model_GNN_BRD4_all.pkl"
+    print(f"Loading {name_file} ...")
     app.state.model_GNN_BRD4_all = load_model(name_file)
+    print(f'✔️✔️✔️{name_file} loaded✔️✔️✔️')
+
+    name_file = "model_GNN_HSA_all.pkl"
+    print(f"Loading {name_file} ...")
+    app.state.model_GNN_HSA_all = load_model(name_file)
+    print(f'✔️✔️✔️{name_file} loaded✔️✔️✔️')
+
+    name_file = "model_GNN_sEH_all.pkl"
+    print(f"Loading {name_file} ...")
+    app.state.model_GNN_sEH_all = load_model(name_file)
     print(f'✔️✔️✔️{name_file} loaded✔️✔️✔️')
 
 
@@ -91,26 +108,9 @@ async def predict( model_name: str = Form(...) ,file : UploadFile = File(...)):
     contents = await file.read()
     df = pd.read_parquet(io.BytesIO(contents))
     print(df)
-
     print(model_name)
 
-
-    if model_name == "Logistic Regression":
-        model = app.state.model_vect_Logistic_Regression_BRD4_all
-
-        preproc_df = vect_preprocess_data(df)
-        X = preproc_df['ecfp'].tolist()
-        prediction = model.predict(X)
-        return prediction
-
-    if model_name == "Random Forest":
-        return { "message" : "From API : Random Forest"}
-
-
-    if model_name == "GNN":
-        model = app.state.model_GNN_BRD4_all
-        return { "message" : "From API : GNN Loaded !!!!!"}
-
-
-
-    return {"message":"Parquet received","columns": df.columns.tolist(),"model_selected":model_name}
+    result_df = process_model_predictions(df,model_name)
+    print(result_df)
+    print(f'{result_df.to_json() =}')
+    return result_df.to_json()
