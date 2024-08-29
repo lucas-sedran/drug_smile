@@ -68,6 +68,7 @@ async def startup_event():
     print(" Startup API =) ")
     print("*"*50)
 
+    #Binary
     name_file = "model_vect_Logistic_Regression_BRD4_all.pkl"
     print(f"Loading {name_file} ...")
     app.state.model_vect_Logistic_Regression_BRD4_all = load_model(name_file)
@@ -83,11 +84,21 @@ async def startup_event():
     app.state.model_vect_Logistic_Regression_sEH_all = load_model(name_file)
     print(f'✔️✔️✔️{name_file} loaded✔️✔️✔️')
 
-    name_file = "model_GNN_BRD4_1k.pkl"
+    #Graphs
+    name_file = "model_GNN_BRD4_all.pkl"
     print(f"Loading {name_file} ...")
     app.state.model_GNN_BRD4_all = load_model(name_file)
     print(f'✔️✔️✔️{name_file} loaded✔️✔️✔️')
 
+    name_file = "model_GNN_HSA_all.pkl"
+    print(f"Loading {name_file} ...")
+    app.state.model_GNN_HSA_all = load_model(name_file)
+    print(f'✔️✔️✔️{name_file} loaded✔️✔️✔️')
+
+    name_file = "model_GNN_sEH_all.pkl"
+    print(f"Loading {name_file} ...")
+    app.state.model_GNN_sEH_all = load_model(name_file)
+    print(f'✔️✔️✔️{name_file} loaded✔️✔️✔️')
 
 
 
@@ -100,10 +111,6 @@ async def predict( model_name: str = Form(...) ,file : UploadFile = File(...)):
     print(model_name)
 
     result_df = process_model_predictions(df,model_name)
+    print(result_df)
     print(f'{result_df.to_json() =}')
     return result_df.to_json()
-
-
-
-
-    return {"message":"Parquet received","columns": df.columns.tolist(),"model_selected":model_name}
