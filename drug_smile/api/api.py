@@ -25,7 +25,7 @@ def root():
 def load_model(name_file):
 
 
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = CREDENTIALS_PATH
+    #os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = CREDENTIALS_PATH
 
 
     # Create folders models if not exist

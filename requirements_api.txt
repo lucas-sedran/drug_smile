@@ -10,3 +10,4 @@ fastapi
 python-multipart
 ipykernel
 torch
+torch_geometric

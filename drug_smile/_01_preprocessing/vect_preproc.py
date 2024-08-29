@@ -4,7 +4,6 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from google.cloud import storage
 from drug_smile.params import *
-from tqdm import tqdm
 
 def download_blob(gcp_project, bucket_name, source_blob_name, destination_file_name):
     """Downloads a blob from the bucket."""
