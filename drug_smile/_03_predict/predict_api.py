@@ -9,11 +9,18 @@ from rdkit.Chem import Draw
 import torch
 from torch_geometric.data import Data
 import numpy as np
+from io import BytesIO
+import base64
 
 def from_smile_to_viz(mol):
     img = Draw.MolToImage(mol)
     return img
 
+def pil_to_base64(img):
+    buffered = BytesIO()
+    img.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+    return img_str
 
 def model_vect_predictions(df,name_model):
     # Préproc
@@ -62,12 +69,14 @@ def predict_with_gnn(model, X):
 def process_model_predictions(df, name_model):
     if name_model in ["Logistic Regression", "Random Forest"]:
         df_encoded = model_vect_predictions(df,name_model)
-        return df_encoded
 
     elif name_model == "GNN":
         df_encoded = model_GNN_predictions(df,name_model)
-        return df_encoded
 
+    df_encoded['molecule_image'] = df_encoded['molecule_smiles'].apply(lambda x: from_smile_to_viz(Chem.MolFromSmiles(x)))
+    df_encoded['molecule_image'] = df_encoded['molecule_image'].apply(pil_to_base64)
+    df_encoded = df_encoded[['id', 'molecule_smiles', 'molecule_image','protein_name','binds','BRD4','HSA','sEH']]
+    return df_encoded
 
 def model_GNN_predictions(df, name_model):
     # Préproc
@@ -91,6 +100,7 @@ def model_GNN_predictions(df, name_model):
             df_concatenated_temps = pd.concat([df_concatenated_temps, y_pred_temp], axis=1)
         else:
             print(f"Le modèle pour {name_protein} n'a pas été trouvé à l'emplacement : {chemin_fichier}")
+
     return df_concatenated_temps
 
 
