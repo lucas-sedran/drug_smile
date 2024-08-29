@@ -45,7 +45,7 @@ def predict_with_gnn(model, X):
             data = Data(x=graph.x, edge_index=graph.edge_index, edge_attr=graph.edge_attr)
             out = model(data)
             prob = torch.sigmoid(out).item()
-            predictions.append(int(prob>=0.5))
+            predictions.append(int(prob>=0.825))
     return np.array(predictions)
 
 
@@ -69,7 +69,7 @@ def model_GNN_predictions(df, name_model):
     # Boucle sur les protéines
     for name_protein in ['BRD4', 'HSA', 'sEH']:
         # Charger le modèle
-        model_name = f"model_{name_model.replace(' ', '_')}_{name_protein}_1k"
+        model_name = f"model_{name_model.replace(' ', '_')}_{name_protein}_all"
         parent_dir = os.path.dirname(os.getcwd())
         chemin_fichier = os.path.join(parent_dir, f"drug_smile/models/{model_name}.pkl")
         if os.path.exists(chemin_fichier):
