@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import joblib
 from drug_smile._01_preprocessing.vect_preproc import vect_preprocess_data
+from drug_smile.params import *
 
 from drug_smile._02_model_train.GNN_train import GNN_smiles_to_graph
 from rdkit import Chem
@@ -34,9 +35,8 @@ def model_vect_predictions(df,name_model):
     # Boucle sur les protéines
     for name_protein in ['BRD4', 'HSA', 'sEH']:
         # Charger le modèle
-        model_name = f"model_vect_{name_model.replace(' ','_')}_{name_protein}_all"
-        parent_dir = os.path.dirname(os.getcwd())
-        chemin_fichier = os.path.join(parent_dir, f"drug_smile/models/{model_name}.pkl")
+        model_name = f"model_vect_{name_model.replace(' ','_')}_{name_protein}_all.pkl"
+        chemin_fichier = os.path.join(MODELS_PATH, model_name)
         model = joblib.load(chemin_fichier)
         print(f"----- {model_name} model loaded -----")
 
@@ -88,9 +88,9 @@ def model_GNN_predictions(df, name_model):
     # Boucle sur les protéines
     for name_protein in ['BRD4', 'HSA', 'sEH']:
         # Charger le modèle
-        model_name = f"model_{name_model.replace(' ', '_')}_{name_protein}_all"
+        model_name = f"model_{name_model.replace(' ', '_')}_{name_protein}_all.pkl"
         parent_dir = os.path.dirname(os.getcwd())
-        chemin_fichier = os.path.join(parent_dir, f"drug_smile/models/{model_name}.pkl")
+        chemin_fichier = os.path.join(MODELS_PATH, model_name)
         if os.path.exists(chemin_fichier):
             model = joblib.load(chemin_fichier)
             print(f"----- {model_name} model loaded -----")

@@ -28,11 +28,11 @@ def load_model(name_file):
     #os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = CREDENTIALS_PATH
 
 
-    # Create folders models if not exist
-    if not os.path.isdir(MODELS_PATH):
-            os.makedirs(MODELS_PATH)
-    else:
-        pass
+    #Create folders models if not exist
+    # if not os.path.isdir(MODELS_PATH):
+    #         os.makedirs(MODELS_PATH)
+    # else:
+    #     pass
 
     model_path = os.path.join(MODELS_PATH, name_file)
     print(f'{model_path = }')
