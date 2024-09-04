@@ -5,6 +5,8 @@
 # OS generated files #
 **.DS_Store
 __MACOSX
+**.mov
+**.pptx
 
 # Jupiter Notebook #
 *.ipynb
