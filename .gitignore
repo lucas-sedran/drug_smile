@@ -28,3 +28,4 @@ models/
 nohup.out
 
 **.egg-info/
+.vscode/
