@@ -110,7 +110,7 @@ if __name__ == "__main__":
     parent_dir = os.path.dirname(os.getcwd())
     file_path = os.path.join(parent_dir, f'drug_smile/raw_data/test_5.parquet')
     df = pd.read_parquet(file_path)
-    model_name = "Logistic Regression" #Logistic Regression #GNN
+    model_name = "Logistic Regression" #Logistic Regression #Random Forest #GNN
     df_result = process_model_predictions(df, model_name)
     # Affichage des résultats
     print(df_result)
