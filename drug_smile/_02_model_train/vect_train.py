@@ -126,22 +126,25 @@ def vect_save_model(name_model, model, name_protein, nb_sample):
     gcp_project = GCP_PROJECT
     bucket_name = BUCKET_PROD_NAME
     source_model_name = name_fichier_model
-    parent_dir = os.path.dirname(os.getcwd())
-    destination_file_name = os.path.join(parent_dir, f'drug_smile/models/{name_fichier_model}')
+    parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    destination_file_name = os.path.join(parent_dir, f'models/{name_fichier_model}')
 
     # Télécharge le fichier localement
     joblib.dump(model, destination_file_name)
     print(f"\nModèle enregistré à : {destination_file_name}\n")
 
-    # Crée un client pour interagir avec GCS
-    storage_client = storage.Client(project=gcp_project)
-    # Accède au bucket spécifié
-    bucket = storage_client.bucket(bucket_name)
-    # Créer un nouvel objet blob dans le bucket
-    blob = bucket.blob(source_model_name)
-    # Télécharger le fichier local vers GCS
-    blob.upload_from_filename(destination_file_name)
-    print(f"\nModèle enregistré sur GCS dans le bucket {bucket_name}\n")
+    try:
+        # Crée un client pour interagir avec GCS
+        storage_client = storage.Client(project=gcp_project)
+        # Accède au bucket spécifié
+        bucket = storage_client.bucket(bucket_name)
+        # Créer un nouvel objet blob dans le bucket
+        blob = bucket.blob(source_model_name)
+        # Télécharger le fichier local vers GCS
+        blob.upload_from_filename(destination_file_name)
+        print(f"\nModèle enregistré sur GCS dans le bucket {bucket_name}\n")
+    except:
+        print("Le modèle n'a pas été enregistré dans le bucket de GCP")
 
 
 def save_param_model(name_model, ap_score, best_params_):
@@ -182,5 +185,8 @@ def save_param_model(name_model, ap_score, best_params_):
         pickle.dump(ours_models, fichier)
 
     # Uploader le fichier mis à jour dans le bucket GCS
-    blob.upload_from_filename(chemin_fichier_local)
-    print(f"\nModèle mis à jour et enregistré sur GCS dans le bucket {bucket_name}\n")
+    try:
+        blob.upload_from_filename(chemin_fichier_local)
+        print(f"\nModèle mis à jour et enregistré sur GCS dans le bucket {bucket_name}\n")
+    except:
+        print("Le modèle n'a pas pu être mis à jour dans le bucket GCP")
