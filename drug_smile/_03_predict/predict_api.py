@@ -34,21 +34,23 @@ def model_vect_predictions(df,name_model):
 
     # Boucle sur les protéines
     for name_protein in ['BRD4', 'HSA', 'sEH']:
-        # Charger le modèle
-        model_name = f"model_vect_{name_model.replace(' ','_')}_{name_protein}_all.pkl"
-        chemin_fichier = os.path.join(MODELS_PATH, model_name)
-        model = joblib.load(chemin_fichier)
-        print(f"----- {model_name} model loaded -----")
+        if df['protein_name'].str.contains(name_protein).any():
+            # Charger le modèle
+            model_name = f"model_vect_{name_model.replace(' ','_')}_{name_protein}_all.pkl"
+            parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+            chemin_fichier = os.path.join(parent_dir, f'models/{model_name}')
+            model = joblib.load(chemin_fichier)
+            print(f"----- {model_name} model loaded -----")
 
 
-        # Prédictions
-        y_pred_temp = model.predict(X)
-        # y_prob = model.predict_proba(X)[:, 1]
-        # threshold = 0.7
-        # y_pred_temp = (y_prob >= threshold).astype(int)
-        print(f"Prédiction {name_protein} : {y_pred_temp}")
-        y_pred_temp = pd.DataFrame(y_pred_temp, columns=[name_protein])
-        df_concatenated_temps = pd.concat([df_concatenated_temps, y_pred_temp], axis=1)
+            # Prédictions
+            y_pred_temp = model.predict(X)
+            # y_prob = model.predict_proba(X)[:, 1]
+            # threshold = 0.7
+            # y_pred_temp = (y_prob >= threshold).astype(int)
+            print(f"Prédiction {name_protein} : {y_pred_temp}")
+            y_pred_temp = pd.DataFrame(y_pred_temp, columns=[name_protein])
+            df_concatenated_temps = pd.concat([df_concatenated_temps, y_pred_temp], axis=1)
 
     df_concatenated_temps = df_concatenated_temps.drop(columns=['molecule','ecfp'])
 
