@@ -20,8 +20,10 @@ def download_blob(gcp_project, bucket_name, source_blob_name, destination_file_n
 def vect_load_data(name_protein, nb_sample):
     """ Charge les données depuis un fichier parquet basé sur le nombre d'échantillons spécifié. """
     name_file = f"df_{name_protein}_{nb_sample}.parquet"
-    parent_dir = os.path.dirname(os.getcwd())
-    train_path = os.path.join(parent_dir, f'drug_smile/raw_data/{name_file}')
+
+    # Définit explicitement le répertoire racine du projet
+    parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    train_path = os.path.join(parent_dir, f'raw_data/{name_file}')
 
     if os.path.exists(train_path):
         print(f"---------------- Data downloaded on local file ----------------")
@@ -86,8 +88,8 @@ def vect_check_and_process_file():
     bucket = storage_client.bucket(BUCKET_DATA_NAME)
     blob = bucket.blob(source_blob_name)
 
-    parent_dir = os.path.dirname(os.getcwd())
-    destination_file_name = os.path.join(parent_dir, f'drug_smile/raw_data/{name_file}')
+    parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    destination_file_name = os.path.join(parent_dir, f'raw_data/{name_file}')
 
     # Vérifier si le fichier existe dans le bucket
     if blob.exists():
@@ -118,10 +120,15 @@ def vect_check_and_process_file():
         print(f"Le fichier {name_file} a été sauvegardé localement.")
 
         # Uploader le fichier .pkl sur le bucket
-        blob.upload_from_filename(destination_file_name)
-        print(f"Le fichier {name_file} a été sauvegardé dans le bucket.")
-
+        try:
+            blob.upload_from_filename(destination_file_name)
+            print(f"Le fichier {name_file} a été sauvegardé dans le bucket GCP.")
+        except:
+            print(f"Le fichier {name_file} n'a pas pu être sauvegardé dans le bucket GCP.")
         # Charger le DataFrame pour un éventuel traitement ultérieur
         df = df_processed
 
     return df
+
+if __name__ == "__main__":
+    vect_check_and_process_file()
