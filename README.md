@@ -2,24 +2,26 @@
 
 ## Description
 
-**drug_smile** est une librairie Python permettant de prédire les interactions entre des molécules et des protéines à l'aide de représentations SMILES et de techniques d'intelligence artificielle. Ce projet a été réalisé dans le cadre d'une formation "Data Science & IA" organisé par Le Wagon. Il s'appuie sur le projet Kaggle **[NeurIPS 2024 - Predict New Medicines with BELKA](https://www.kaggle.com/competitions/leash-BELKA/overview)**.
+**drug_smile** est une librairie Python permettant de prédire les interactions entre des molécules et des protéines à l'aide de représentations SMILES et de techniques de Machine Learning et de Deep Learning. Ce projet a été réalisé dans le cadre d'une formation "Data Science & IA" organisée par Le Wagon.
+
+Il s'appuie sur le projet Kaggle **[NeurIPS 2024 - Predict New Medicines with BELKA](https://www.kaggle.com/competitions/leash-BELKA/overview)**.
 
 Cette librairie a été développée dans le cadre d'un projet collaboratif par :
-- **Lucas Sedran** ([lucas.sedran@hotmail.fr](mailto:lucas.sedran@hotmail.fr))
+- **Lucas Sedran** ([lucas.sedran@hotmail.fr](mailto:lucas.sedran@hotmail.fr)) ([https://www.linkedin.com/in/lucassedran/](https://www.linkedin.com/in/lucassedran/))
 - **Benoit Cochet**
 - **Dorian Schnepp**
 - **Issam Mehnana**
 
 Les principales fonctionnalités incluent :
-- La transformation des molécules SMILES en formats exploitables (ex. ECFP).
-- L'entraînement de modèles d'apprentissage automatique (Régression Logistique, SVC, GNN).
+- La transformation des molécules du format SMILES en formats exploitables (ex. ECFP).
+- L'entraînement de modèles d'apprentissage (Régression Logistique, SVC, GNN).
 - La prédiction d'interactions moléculaires.
 
 ## Installation
 
 ### Prérequis
 
-Assurez-vous que **Python 3.8+** est installé sur votre machine (cette librairie a été faite sur Python **3.10.6**).
+Assurez-vous que **Python 3.8+** est installé sur votre machine. Cette librairie a été développée et testée sur **Python 3.10.6**.
 
 ### Étapes d'installation
 
@@ -31,6 +33,7 @@ Assurez-vous que **Python 3.8+** est installé sur votre machine (cette librairi
   ```
 
 **2. Créez un environnement virtuel (optionnel mais recommandé) :**
+
 Soit avec venv (rapide et simple) :
   ```bash
   python -m venv drug_smile-env
@@ -45,6 +48,7 @@ Soit avec pyenv (si vous devez gérer plusieurs versions de Python) :
   pyenv local drug_smile-env
   ```
 **3. Installez la librairie et ses dépendances :**
+
 Avec `setup.py` :
   ```bash
   pip install .
@@ -70,4 +74,5 @@ Ce projet est distribué sans **licence explicite**. Contactez les auteurs pour 
 
 ## Liens utiles
 Projet Kaggle : https://www.kaggle.com/competitions/leash-BELKA/overview
+
 Dépôt GitHub principal : https://github.com/lucas-sedran/drug_smile
