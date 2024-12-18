@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import AllChem
+from rdkit import RDLogger
 from google.cloud import storage
 from drug_smile.params import *
 
@@ -50,6 +51,8 @@ def vect_clean_data(df):
 def vect_generate_ecfp(molecule, radius=2, bits=1024):
     """ Génère un vecteur de bits représentant la molécule en fonction de la structure chimique locale
     autour de chaque atome jusqu'à une certaine distance (radius). """
+    # Désactiver les warnings RDKit
+    RDLogger.DisableLog('rdApp.*')
     if molecule is None:
         return None
     fingerprint = AllChem.GetMorganFingerprintAsBitVect(molecule, radius, nBits=bits)
@@ -57,6 +60,8 @@ def vect_generate_ecfp(molecule, radius=2, bits=1024):
 
 def vect_preprocess_data(df, chunk_size=CHUNK_SIZE):
     """Applique le prétraitement sur le DataFrame par chunks : convertit les SMILES en objets RDKit et génère les ECFP."""
+    # Désactiver les warnings RDKit
+    RDLogger.DisableLog('rdApp.*')
     print(f"------------------- START smile transformation into molecule -------------------")
 
     df_chunks = []
