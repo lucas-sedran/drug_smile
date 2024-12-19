@@ -7,15 +7,15 @@
 Il s'appuie sur le projet Kaggle **[NeurIPS 2024 - Predict New Medicines with BELKA](https://www.kaggle.com/competitions/leash-BELKA/overview)**.
 
 Cette librairie a été développée dans le cadre d'un projet collaboratif par :
-- **Lucas Sedran** ([lucas.sedran@hotmail.fr](mailto:lucas.sedran@hotmail.fr)) ([https://www.linkedin.com/in/lucassedran/](https://www.linkedin.com/in/lucassedran/))
-- **Benoit Cochet**
-- **Dorian Schnepp**
-- **Issam Mehnana**
+- Lucas Sedran ([lucas.sedran@hotmail.fr](mailto:lucas.sedran@hotmail.fr)) ([https://www.linkedin.com/in/lucassedran/](https://www.linkedin.com/in/lucassedran/))
+- Benoit Cochet
+- Dorian Schnepp
+- Issam Mehnana
 
 Les principales fonctionnalités incluent :
 - `drug_smile/_00_prepration` : La création des échantillons.
-- `drug_smile/_01_preprocessing` : La transformation des molécules du format SMILES en formats exploitables : **caractéristiques chimiques** (appelés '*cara*'), **ECFP** (appelés '*vect*') et **graph** (appelés '*GNN*').
-- `drug_smile/_02_model_train` : L'entraînement de modèles d'apprentissage : **SVC** (pour les caractéristiques chimiques et les ECFP), **Régression Logistique** (pour les ECFP) et **GNN** (pour les graph).
+- `drug_smile/_01_preprocessing` : La transformation des molécules du format SMILES en formats exploitables : **caractéristiques chimiques** (appelé '*cara*'), **ECFP** (appelé '*vect*') et **graphes** (appelé '*GNN*').
+- `drug_smile/_02_model_train` : L'entraînement de modèles d'apprentissage : **SVC** (pour les caractéristiques chimiques et les ECFP), **Régression Logistique** (pour les ECFP) et **GNN** (pour les graphes).
 - `drug_smile/_03_predict` : La prédiction d'interactions molécule-protéine.
 
 ## Installation
