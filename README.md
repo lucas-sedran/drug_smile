@@ -47,7 +47,33 @@ Soit avec pyenv (si vous devez gérer plusieurs versions de Python) :
   pyenv virtualenv 3.10.6 drug_smile-env
   pyenv local drug_smile-env
   ```
-**3. Installez la librairie et ses dépendances :**
+**3. Configurez les variables d'environnement :**
+
+Certaines fonctionnalités de la librairie nécessitent des variables d'environnement. Suivez ces étapes pour les configurer :
+
+Copiez le fichier **`.env.sample`** et renommez-le en **`.env`** :
+  ```bash
+  cp .env.sample .env
+  ```
+
+Installez et configurez **`direnv`** pour gérer automatiquement les variables d'environnement :
+1. Installez **`direnv`** :
+  ```bash
+  brew install direnv    # Sur macOS
+  sudo apt install direnv # Sur /Linux
+  ```
+Sur Windows : Utilisez **WSL** pour installer direnv ou gérez les variables avec un autre outil.
+2. Ajoutez **direnv** à votre shell (bash, zsh, etc.) en suivant les instructions [officielles](https://direnv.net/docs/hook.html).
+3. Autorisez l'utilisation des variables d'environnement dans le répertoire du projet :
+  ```bash
+  direnv allow
+  ```
+4. En cas de mise à jour des variables d'environnement :
+  ```bash
+  direnv reload
+  ```
+
+**4. Installez la librairie et ses dépendances :**
 
 Avec `setup.py` :
   ```bash
