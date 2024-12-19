@@ -13,9 +13,10 @@ Cette librairie a été développée dans le cadre d'un projet collaboratif par 
 - **Issam Mehnana**
 
 Les principales fonctionnalités incluent :
-- La transformation des molécules du format SMILES en formats exploitables (ex. ECFP).
-- L'entraînement de modèles d'apprentissage (Régression Logistique, SVC, GNN).
-- La prédiction d'interactions moléculaires.
+- `drug_smile/_00_prepration` : La création des échantillons.
+- `drug_smile/_01_preprocessing` : La transformation des molécules du format SMILES en formats exploitables : **caractéristiques chimiques** (appelés '*cara*'), **ECFP** (appelés '*vect*') et **graph** (appelés '*GNN*').
+- `drug_smile/_02_model_train` : L'entraînement de modèles d'apprentissage : **SVC** (pour les caractéristiques chimiques et les ECFP), **Régression Logistique** (pour les ECFP) et **GNN** (pour les graph).
+- `drug_smile/_03_predict` : La prédiction d'interactions molécule-protéine.
 
 ## Installation
 
