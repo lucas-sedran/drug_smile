@@ -63,7 +63,9 @@ Installez et configurez **`direnv`** pour gérer automatiquement les variables d
   sudo apt install direnv # Sur /Linux
   ```
 Sur Windows : Utilisez **WSL** pour installer direnv ou gérez les variables avec un autre outil.
+
 2. Ajoutez **direnv** à votre shell (bash, zsh, etc.) en suivant les instructions [officielles](https://direnv.net/docs/hook.html).
+
 3. Autorisez l'utilisation des variables d'environnement dans le répertoire du projet :
   ```bash
   direnv allow
